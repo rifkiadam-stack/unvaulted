@@ -54,5 +54,8 @@ For multi-step tasks, state a brief plan:
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
----
 
+## Note: Workflow
+At the start of every session, read `.agents/workflows/workflow.md` 
+to understand your role in this project's pipeline.
+---
