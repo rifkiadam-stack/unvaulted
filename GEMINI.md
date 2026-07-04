@@ -55,7 +55,10 @@ For multi-step tasks, state a brief plan:
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
 
-## Note: Workflow
-At the start of every session, read `.agents/workflows/workflow.md` 
-to understand your role in this project's pipeline.
+## 5. Session Startup
+
+At the start of every session:
+
+1. Read `.agents/workflows/workflow.md` to understand your role in this project's pipeline.
+2. Read `.agents/skills/using-superpowers/SKILL.md` and follow it: invoke any relevant skill before acting.
 ---

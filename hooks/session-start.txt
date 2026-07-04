@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# session-start berada di:
+# C:/repos/unvaulted/hooks/session-start
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+# repo root adalah parent dari folder hooks:
+# C:/repos/unvaulted
+REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+SKILL_FILE="${REPO_ROOT}/skills/using-superpowers/SKILL.md"
+
+if [ ! -f "$SKILL_FILE" ]; then
+  printf '{\n  "additionalContext": "Error: using-superpowers skill not found at %s"\n}\n' "$SKILL_FILE"
+  exit 0
+fi
+
+using_superpowers_content="$(cat "$SKILL_FILE")"
+
+escape_for_json() {
+  local s="$1"
+  s="${s//\\/\\\\}"
+  s="${s//\"/\\\"}"
+  s="${s//$'\n'/\\n}"
+  s="${s//$'\r'/\\r}"
+  s="${s//$'\t'/\\t}"
+  printf '%s' "$s"
+}
+
+using_superpowers_escaped="$(escape_for_json "$using_superpowers_content")"
+
+session_context="<EXTREMELY_IMPORTANT>\nYou have superpowers.\n\nBelow is the full content of your using-superpowers skill:\n\n${using_superpowers_escaped}\n</EXTREMELY_IMPORTANT>"
+
+printf '{\n  "additionalContext": "%s"\n}\n' "$session_context"
+
+exit 0
