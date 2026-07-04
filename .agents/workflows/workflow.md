@@ -79,7 +79,7 @@ implementing blindly (see `receiving-code-review` if present).
 
 ## Related skills
 
-- `executing-plans` — the disciplined way to run a plan
-- `verification-before-completion` — evidence before any completion claim
-- `using-superpowers` — invoke the relevant skill before acting
-- `receiving-code-review` — how to respond to review feedback (if installed)
+- [executing-plans](file:///c:/repos/unvaulted/.agents/skills/executing-plans/SKILL.md) — the disciplined way to run a plan
+- [verification-before-completion](file:///c:/repos/unvaulted/.agents/skills/verification-before-completion/SKILL.md) — evidence before any completion claim
+- [using-skills](file:///c:/repos/unvaulted/.agents/skills/using-skills/SKILL.md) — invoke the relevant skill before acting
+- [receiving-code-review](file:///c:/repos/unvaulted/.agents/skills/receiving-code-review/SKILL.md) — how to respond to review feedback (if installed)

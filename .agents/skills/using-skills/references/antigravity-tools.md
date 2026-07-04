@@ -4,7 +4,7 @@ Skills speak in actions ("dispatch a subagent", "create a todo", "read a file").
 
 | Action skills request | Antigravity CLI equivalent |
 |----------------------|----------------------|
-| Dispatch a subagent (`Subagent (general-purpose):` template) | `invoke_subagent` with a built-in `TypeName` — `self` for full-capability work, `research` for read-only (see [Subagent support](#subagent-support)) |
+| Dispatch a subagent (`Subagent (general-purpose):` template) | `browser_subagent` for executing browser actions with a detailed task description (see [Subagent support](#subagent-support)) |
 | Task tracking ("create a todo", "mark complete") | a **task artifact** — `write_to_file` with `IsArtifact: true` and `ArtifactType: "task"` (see [Task tracking](#task-tracking)). **Not** `manage_task`, which manages background processes. |
 
 ## Task tracking
@@ -21,3 +21,11 @@ your plan. As you complete each step, edit the artifact to mark it done (`- [x]`
 If the plan changes, update the checklist. Keep it current — it is your source of
 truth for what remains; once the conversation gets long, re-read it before starting
 each step.
+
+## Subagent support
+
+Antigravity uses the `browser_subagent` tool to run tasks inside a browser window. To invoke a subagent:
+1. Specify a descriptive, capitalized `TaskName`.
+2. Provide a clear, actionable, detailed `Task` description containing all necessary context and criteria.
+3. Provide a `RecordingName` (lowercase with underscores) to record the browser session.
+

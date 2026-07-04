@@ -11,7 +11,7 @@ Load plan, review critically, execute all tasks, report when complete.
 
 **Announce at start:** "I'm using the executing-plans skill to implement this plan."
 
-**Note:** Tell your human partner that Superpowers works much better with access to subagents. The quality of its work will be significantly higher if run on a platform with subagent support (Claude Code, Codex CLI, Codex App, and Copilot CLI all qualify; see the per-platform tool refs in `../using-superpowers/references/`). If subagents are available, use superpowers:subagent-driven-development instead of this skill.
+**Note:** Tell your human partner that this workflow works much better with access to subagents. The quality of its work will be significantly higher if run on a platform with subagent support (Claude Code, Codex CLI, Codex App, and Copilot CLI all qualify; see the per-platform tool refs in `../using-skills/references/`). If subagents are available, prefer a subagent-driven approach to fan out independent tasks.
 
 ## The Process
 
@@ -29,12 +29,12 @@ For each task:
 3. Run verifications as specified
 4. Mark as completed
 
-### Step 3: Complete Development
+### Step 3: Report Completion
 
 After all tasks complete and verified:
-- Announce: "I'm using the finishing-a-development-branch skill to complete this work."
-- **REQUIRED SUB-SKILL:** Use superpowers:finishing-a-development-branch
-- Follow that skill to verify tests, present options, execute choice
+- Announce that all plan steps are done and verified.
+- Report the commit range so the orchestrator can review it.
+- Do NOT merge, push to main, or finish the branch — the orchestrator handles review and merge.
 
 ## When to Stop and Ask for Help
 
@@ -64,7 +64,7 @@ After all tasks complete and verified:
 
 ## Integration
 
-**Required workflow skills:**
-- **superpowers:using-git-worktrees** - Ensures isolated workspace (creates one or verifies existing)
-- **superpowers:writing-plans** - Creates the plan this skill executes
-- **superpowers:finishing-a-development-branch** - Complete development after all tasks
+This skill is the executor's core loop in a two-agent pipeline:
+- The **orchestrator** (Claude) writes the plan and sets up the isolated workspace.
+- This skill executes the plan step-by-step with per-step commits.
+- The **orchestrator** reviews the committed work and merges — the executor never merges.

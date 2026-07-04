@@ -60,5 +60,5 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 At the start of every session:
 
 1. Read `.agents/workflows/workflow.md` to understand your role in this project's pipeline.
-2. Read `.agents/skills/using-superpowers/SKILL.md` and follow it: invoke any relevant skill before acting.
+2. Read `.agents/skills/using-skills/SKILL.md` and follow it: invoke any relevant skill before acting.
 ---

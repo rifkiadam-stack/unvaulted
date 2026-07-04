@@ -1,0 +1,20 @@
+{
+  "name": "claude-gemini-workflow-dev",
+  "description": "Development marketplace for the claude-gemini-workflow plugin",
+  "owner": {
+    "name": "Rifki Adam",
+    "email": "rifki.rahmazaki.adam@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "claude-gemini-workflow",
+      "description": "Skills & workflow for a two-agent Claude↔Gemini pipeline (Claude orchestrates & reviews, Gemini executes)",
+      "version": "0.1.0",
+      "source": "./",
+      "author": {
+        "name": "Rifki Adam",
+        "email": "rifki.rahmazaki.adam@gmail.com"
+      }
+    }
+  ]
+}

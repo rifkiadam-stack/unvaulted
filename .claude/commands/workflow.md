@@ -89,4 +89,4 @@ The only things it shares with you are files on the repo filesystem.
 - `review-external` — review the external executor's commits against a plan
 - `handoff-antigravity` — fallback: capture context not yet in a plan
 - `verification-before-completion` — never claim PASS without running the check
-- `using-superpowers` — invoke the relevant skill before acting
+- `using-skills` — invoke the relevant skill before acting
