@@ -25,9 +25,10 @@ Then announce "Using [skill] to [purpose]" and follow the skill exactly. If it h
 
 ## Skill Priority
 
-When multiple skills apply, process skills come first — they set the approach, then implementation skills (frontend-design, etc.) carry it out. executing-plans and verification-before-completion are this plugin's most common process skills, but the rule holds for any of them.
+When multiple skills apply, process skills come first — they set the approach, then implementation skills (frontend-design, etc.) carry it out. executing-plans, test-driven-development, and verification-before-completion are this plugin's most common process skills, but the rule holds for any of them.
 
 - Given a plan file → executing-plans first, then implementation skills.
+- Before writing any implementation code (feature, bugfix, refactor) → test-driven-development first.
 
 ## Red Flags
 
