@@ -51,11 +51,7 @@ These thoughts mean STOP—you're rationalizing:
 
 ## Platform Adaptation
 
-If your harness appears here, read its reference file for special instructions:
-
-- Codex: `references/codex-tools.md`
-- Pi: `references/pi-tools.md`
-- Antigravity: [antigravity-tools.md](file:///c:/repos/unvaulted/.agents/skills/using-skills/references/antigravity-tools.md)
+Read [antigravity-tools.md](file:///c:/repos/unvaulted/.agents/skills/using-skills/references/antigravity-tools.md) for tool-mapping instructions specific to this harness.
 
 ## User Instructions
 
