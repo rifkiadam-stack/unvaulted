@@ -4,7 +4,8 @@ Skills speak in actions ("dispatch a subagent", "create a todo", "read a file").
 
 | Action skills request | Antigravity CLI equivalent |
 |----------------------|----------------------|
-| Dispatch a subagent (`Subagent (general-purpose):` template) | `browser_subagent` for executing browser actions with a detailed task description (see [Subagent support](#subagent-support)) |
+| Dispatch a subagent for a browser/UI task (testing, web navigation) | `browser_subagent` — see [Subagent support](#subagent-support) |
+| Dispatch a subagent for a general coding task (parallel implementation, research) | **No equivalent.** Antigravity has no general-purpose coding subagent — execute the task directly in the main session instead. |
 | Task tracking ("create a todo", "mark complete") | a **task artifact** — `write_to_file` with `IsArtifact: true` and `ArtifactType: "task"` (see [Task tracking](#task-tracking)). **Not** `manage_task`, which manages background processes. |
 
 ## Task tracking
@@ -28,4 +29,6 @@ Antigravity uses the `browser_subagent` tool to run tasks inside a browser windo
 1. Specify a descriptive, capitalized `TaskName`.
 2. Provide a clear, actionable, detailed `Task` description containing all necessary context and criteria.
 3. Provide a `RecordingName` (lowercase with underscores) to record the browser session.
+
+**Scope limit:** `browser_subagent` only runs actions inside a browser window. It is not a substitute for general-purpose coding-task delegation — there is no such mechanism on Antigravity. When a skill says to fan out coding or research work to subagents, execute those tasks directly in the main session instead.
 
