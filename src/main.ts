@@ -1,1 +1,4 @@
-// Empty entry point for initial typecheck
+import { createEditor } from "./editor";
+
+createEditor(document.querySelector('#app')!, '');
+
