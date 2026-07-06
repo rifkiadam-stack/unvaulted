@@ -1,0 +1,41 @@
+{
+  "name": "unvaulted",
+  "version": "1.0.0",
+  "description": "An Obsidian-like Markdown editor and reader for standalone files, without requiring a vault-based workspace.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "tauri": "tauri"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rifkiadam-stack/unvaulted.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/rifkiadam-stack/unvaulted/issues"
+  },
+  "homepage": "https://github.com/rifkiadam-stack/unvaulted#readme",
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.11.4",
+    "typescript": "^6.0.3",
+    "vite": "^8.1.3",
+    "vitest": "^4.1.10"
+  },
+  "dependencies": {
+    "@codemirror/state": "^6.7.1",
+    "@codemirror/view": "^6.43.6",
+    "@tauri-apps/api": "^2.11.1",
+    "codemirror": "^6.0.2"
+  }
+}
