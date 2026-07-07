@@ -2,7 +2,13 @@ import { Extension, StateField, Transaction, EditorState, Range } from "@codemir
 import { Decoration, DecorationSet, EditorView } from "@codemirror/view";
 import { syntaxTree } from "@codemirror/language";
 import { buildInlineDecorations } from "./widgets/inline";
-import { buildLinkDecorations } from "./widgets/links";
+import { buildLinkDecorations, uvOpenExternal } from "./widgets/links";
+import { buildHrDecorations } from "./widgets/hr";
+import { buildBlockquoteDecorations } from "./widgets/blockquote";
+import { buildTaskDecorations } from "./widgets/task";
+import { buildImageDecorations, uvBasePath } from "./widgets/image";
+
+export { uvOpenExternal, uvBasePath };
 
 function buildDecorations(state: EditorState): DecorationSet {
   const decos: Range<Decoration>[] = [];
@@ -11,6 +17,10 @@ function buildDecorations(state: EditorState): DecorationSet {
     enter(node) {
       buildInlineDecorations(state, node, decos);
       buildLinkDecorations(state, node, decos);
+      buildHrDecorations(state, node, decos);
+      buildBlockquoteDecorations(state, node, decos);
+      buildTaskDecorations(state, node, decos);
+      buildImageDecorations(state, node, decos);
     }
   });
 
