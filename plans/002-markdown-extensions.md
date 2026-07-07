@@ -245,3 +245,52 @@ Stop and report back (do not improvise) if:
   ever changes, `obsidian.test.ts` documents the contract to update.
 - Reviewer should scrutinize: that extensions live purely in the Lezer layer (no
   editor/view imports in `src/markdown/` except `lang.ts`'s `LanguageSupport`).
+
+## Review — 2026-07-07
+
+**Verdict: PASS.**
+
+Reviewed range `main..feat/002-parsing-layer` (6 commits, one per step). Working
+tree clean at executor tip `796ec68`. Gates re-run independently:
+
+| Criterion | Command | Result |
+|-----------|---------|--------|
+| Typecheck | `npm run typecheck` | exit 0 |
+| Unit tests | `npm test` | 5 files, 31 tests, all pass |
+| Build | `npm run build` | exit 0 |
+| Parser/renderer separation | `grep -rn "Decoration" src/markdown/` | 0 matches |
+| Dependency scope | `git diff main..feat/002-parsing-layer -- package.json` | exactly the 5 named packages, nothing extra |
+| File scope | `git diff --stat main..feat/002-parsing-layer` | 12 files, all in the plan's in-scope list |
+
+**Interface contract verified line-by-line** (this is the part plan 003 depends on
+absolutely): `unvaultedMarkdown(): LanguageSupport` in `lang.ts` matches the
+contract exactly (base `markdownLanguage`, `codeLanguages: languages`, the 5
+extensions wired in). All 6 required node names present verbatim in
+`extensions.ts`: `Highlight`, `HighlightMark`, `Wikilink`, `Embed`, `Tag`,
+`Frontmatter`. `parseCalloutHeader` in `callout.ts` matches the interface contract
+signature and all 4 spec'd cases exactly.
+
+**Test coverage cross-checked against every row of both behavior-spec tables** —
+not just "tests exist" but each specified case has its own assertion:
+`gfm.test.ts` covers all 14 GFM baseline rows; `obsidian.test.ts` covers all 8
+custom-extension rows including edge cases (`[[]]` empty rejected, Embed beats
+Image, `a#b`/`#1`/`# heading` all correctly rejected as Tag, frontmatter-at-start
+vs. later-`---`-as-HorizontalRule both tested); `callout.test.ts` covers all 4
+cases; `corpus.test.ts` matches the plan's exact assertion list (Frontmatter,
+Wikilink ≥2, Tag, Highlight, Table, TaskMarker, FencedCode, <200ms) plus Embed.
+
+Implementation quality: correct use of Lezer's paired-delimiter pattern for
+Highlight, `before`/`after` ordering to make Wikilink/Embed win over
+Link/Image, and `cx.lineStart === 0` gating so Frontmatter only fires at
+document start — matches the plan's precise behavioral requirements, not just
+the shape of them.
+
+**Minor process note (non-blocking):** the executor's commit pre-marked
+`plans/README.md` status as "DONE (PASS)" — rendering PASS/FAIL verdicts is the
+reviewer's role in this pipeline, not the executor's. No content correction
+needed here since independent review reached the same verdict, but noting it so
+future plans can remind the executor to leave the status row as "awaiting
+review" rather than self-declaring.
+
+**Ready to merge** `feat/002-parsing-layer` → `main`. Plan 003 (live-preview
+decorations) can proceed — it consumes exactly the node names verified above.
