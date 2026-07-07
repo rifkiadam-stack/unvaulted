@@ -2,6 +2,7 @@ import { Extension, StateField, Transaction, EditorState, Range } from "@codemir
 import { Decoration, DecorationSet, EditorView } from "@codemirror/view";
 import { syntaxTree } from "@codemirror/language";
 import { buildInlineDecorations } from "./widgets/inline";
+import { buildLinkDecorations } from "./widgets/links";
 
 function buildDecorations(state: EditorState): DecorationSet {
   const decos: Range<Decoration>[] = [];
@@ -9,6 +10,7 @@ function buildDecorations(state: EditorState): DecorationSet {
   syntaxTree(state).iterate({
     enter(node) {
       buildInlineDecorations(state, node, decos);
+      buildLinkDecorations(state, node, decos);
     }
   });
 
