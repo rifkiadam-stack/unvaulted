@@ -56,4 +56,15 @@ describe("Obsidian inline extensions", () => {
     const nodes = parseNodes("# heading");
     expect(nodes.map(n => n.name)).not.toContain("Tag");
   });
+
+  it("parses Frontmatter at start of doc", () => {
+    const nodes = parseNodes("---\ntitle: doc\n---\nbody");
+    expect(nodes.map(n => n.name)).toContain("Frontmatter");
+  });
+
+  it("does not parse Frontmatter later in doc", () => {
+    const nodes = parseNodes("body\n\n---\nnot frontmatter\n---");
+    expect(nodes.map(n => n.name)).not.toContain("Frontmatter");
+    expect(nodes.map(n => n.name)).toContain("HorizontalRule");
+  });
 });

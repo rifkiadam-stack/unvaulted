@@ -101,3 +101,35 @@ export const Tag: MarkdownConfig = {
     before: "Entity"
   }]
 };
+
+import { BlockContext, Line } from "@lezer/markdown";
+import { Tree } from "@lezer/common";
+
+export const Frontmatter: MarkdownConfig = {
+  defineNodes: [{
+    name: "Frontmatter",
+    block: true,
+    composite(cx, line, value) {
+      // If we see another ---, we consume it and end the block
+      if (line.text === "---") {
+        cx.nextLine();
+        return false;
+      }
+      // Otherwise, the composite block continues
+      return true;
+    }
+  }],
+  parseBlock: [{
+    name: "Frontmatter",
+    parse(cx: BlockContext, line: Line): boolean | null {
+      if (cx.lineStart === 0 && line.text === "---") {
+        // Consume the first ---
+        cx.nextLine();
+        cx.startComposite("Frontmatter", 0);
+        return null; // Signals that we started a composite block
+      }
+      return false;
+    },
+    before: "HorizontalRule"
+  }]
+};
