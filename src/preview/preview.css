@@ -39,3 +39,8 @@
 .uv-h4 { font-size: 1.1em; font-weight: bold; }
 .uv-h5 { font-size: 1.0em; font-weight: bold; }
 .uv-h6 { font-size: 0.9em; font-weight: bold; }
+
+.cm-content :is(.uv-h1,.uv-h2,.uv-h3,.uv-h4,.uv-h5,.uv-h6),
+.cm-content :is(.uv-h1,.uv-h2,.uv-h3,.uv-h4,.uv-h5,.uv-h6) * {
+  text-decoration: none !important;
+}
