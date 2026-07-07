@@ -8,6 +8,7 @@ import { buildBlockquoteDecorations } from "./widgets/blockquote";
 import { buildCalloutDecorations } from "./widgets/callout";
 import { buildTaskDecorations } from "./widgets/task";
 import { buildImageDecorations, uvBasePath } from "./widgets/image";
+import { buildPropertiesDecorations } from "./widgets/properties";
 
 export { uvOpenExternal, uvBasePath };
 
@@ -27,6 +28,7 @@ function buildDecorations(state: EditorState): DecorationSet {
       
       buildTaskDecorations(state, node, decos);
       buildImageDecorations(state, node, decos);
+      buildPropertiesDecorations(state, node, decos);
     }
   });
 
