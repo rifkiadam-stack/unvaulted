@@ -9,6 +9,7 @@ export interface Platform {
   readFile(path: string): Promise<string>;
   saveAtomic(path: string, contents: string): Promise<void>;
   showOpenDialog(): Promise<string | null>;
+  showSaveDialog(): Promise<string | null>;
   confirmClose(fileName: string): Promise<'save' | 'discard' | 'cancel'>;
   setTitle(title: string): Promise<void>;
   openExternal(url: string): Promise<void>;
@@ -32,6 +33,13 @@ export function tauriPlatform(): Platform {
       });
       if (selected === null) return null;
       return Array.isArray(selected) ? selected[0] : selected;
+    },
+    async showSaveDialog() {
+      const { save } = await import('@tauri-apps/plugin-dialog');
+      const selected = await save({
+        filters: [{ name: 'Markdown', extensions: ['md', 'markdown'] }]
+      });
+      return selected;
     },
     async confirmClose(fileName: string) {
       // In Tauri v2, we can't easily build a 3-button custom dialog purely natively,
