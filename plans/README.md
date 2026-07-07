@@ -15,7 +15,7 @@ live preview, manual save, near-zero chrome.
 | Plan | Title | Priority | Effort | Depends on | Status |
 |------|-------|----------|--------|------------|--------|
 | 001 | Scaffold Tauri+Vite+CM6, verification baseline | P1 | M | — | DONE (PASS — smoke confirmed after vite watcher fix) |
-| 002 | Markdown dialect parsing layer (GFM + Obsidian nodes) | P1 | M | 001 | TODO |
+| 002 | Markdown dialect parsing layer (GFM + Obsidian nodes) | P1 | M | 001 | DONE (PASS) |
 | 003 | Live-preview decoration engine | P1 | L | 002 | TODO |
 | 004 | File session (open/save/dirty) + Tauri app shell | P1 | M | 001 | TODO |
 | 005 | Obsidian default theme (dark+light, follows OS) | P2 | M | 003 | TODO |
