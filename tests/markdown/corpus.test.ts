@@ -16,7 +16,7 @@ related:
 > [!info] Project Status
 > This is a callout in the project.
 
-Here is a paragraph with some ==highlighted text== and a #project/sub-1 tag.
+Here is a paragraph with some ==highlighted text==, a #project/sub-1 tag, and some wikilinks: [[Link 1]] and [[Link 2|Alias]].
 
 ## Tasks
 

@@ -108,25 +108,27 @@ import { Tree } from "@lezer/common";
 export const Frontmatter: MarkdownConfig = {
   defineNodes: [{
     name: "Frontmatter",
-    block: true,
-    composite(cx, line, value) {
-      // If we see another ---, we consume it and end the block
-      if (line.text === "---") {
-        cx.nextLine();
-        return false;
-      }
-      // Otherwise, the composite block continues
-      return true;
-    }
+    block: true
   }],
   parseBlock: [{
     name: "Frontmatter",
-    parse(cx: BlockContext, line: Line): boolean | null {
+    parse(cx: BlockContext, line: Line): boolean {
       if (cx.lineStart === 0 && line.text === "---") {
-        // Consume the first ---
+        const start = cx.lineStart;
         cx.nextLine();
-        cx.startComposite("Frontmatter", 0);
-        return null; // Signals that we started a composite block
+        
+        while (true) {
+          if (line.text === "---") {
+            cx.nextLine();
+            break;
+          }
+          if (!cx.nextLine()) {
+            break;
+          }
+        }
+        
+        cx.addElement(cx.elt("Frontmatter", start, cx.prevLineEnd()));
+        return true;
       }
       return false;
     },
