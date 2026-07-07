@@ -14,7 +14,7 @@ live preview, manual save, near-zero chrome.
 
 | Plan | Title | Priority | Effort | Depends on | Status |
 |------|-------|----------|--------|------------|--------|
-| 001 | Scaffold Tauri+Vite+CM6, verification baseline | P1 | M | — | TODO |
+| 001 | Scaffold Tauri+Vite+CM6, verification baseline | P1 | M | — | DONE |
 | 002 | Markdown dialect parsing layer (GFM + Obsidian nodes) | P1 | M | 001 | TODO |
 | 003 | Live-preview decoration engine | P1 | L | 002 | TODO |
 | 004 | File session (open/save/dirty) + Tauri app shell | P1 | M | 001 | TODO |
