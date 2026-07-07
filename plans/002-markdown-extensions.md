@@ -294,3 +294,63 @@ review" rather than self-declaring.
 
 **Ready to merge** `feat/002-parsing-layer` → `main`. Plan 003 (live-preview
 decorations) can proceed — it consumes exactly the node names verified above.
+
+## Correction — 2026-07-07 — Frontmatter termination bug (found during 003 Step 5)
+
+**Defect (confirmed by AST dump):** the `Frontmatter` composite block never
+terminates at the closing `---`. For
+`"---\ntitle: Hello\ntags: [a, b]\n---\n\nout\nmore text\n# heading"` (58 chars,
+closing fence ends ≈ offset 34), the tree is `Document(0-58)` containing
+`Frontmatter(4-58)` — the node swallows every paragraph and heading to EOF.
+Downstream effect: plan 003's Properties widget replaces the whole document body.
+
+**Why plan 002's review missed it:** the tests this plan specified assert node
+*presence* only (`toContain("Frontmatter")`), and the flattening harness iterates
+into children — so body nodes "inside" the bloated Frontmatter still appeared.
+Presence assertions cannot catch extent bugs. That was a test-spec gap in this
+plan, owned by the plan author; this correction adds extent assertions.
+
+**Authorized hotfix (scope exception):** execute as **one commit on the current
+`feat/003-live-preview` branch**, message prefix `002-hotfix:`. Files allowed:
+`src/markdown/extensions.ts` (the `Frontmatter` config only),
+`tests/markdown/` (extend `harness.ts` additively with `from`/`to` on returned
+nodes if needed; add extent regression tests). Nothing else — plan 003's
+out-of-scope rule stays in force for all other `src/markdown/` code.
+
+**Required behavior (the contract):**
+
+1. Terminated frontmatter (closing `---` line exists): the `Frontmatter` node
+   spans from the opening fence through the end of the closing fence line —
+   and no further. All content after it parses normally at document level
+   (NOT as children of `Frontmatter`).
+2. Only at document start (existing `cx.lineStart === 0` behavior — keep).
+3. Unterminated (no closing `---` before EOF): preferred — do **not** emit a
+   `Frontmatter` node at all (the opening `---` falls through to the base
+   grammar). If the installed `@lezer/markdown` block API genuinely cannot
+   back out after consuming lines, the fallback — unterminated frontmatter
+   spans to EOF — is acceptable **only** with a test documenting that behavior
+   and a note in your report.
+
+**Suggested implementation shape** (replace the composite-based approach — the
+`composite()` + in-predicate `nextLine()` pattern is the source of the bug):
+a single `parseBlock` entry that, on `---` at line 0, scans lines forward to the
+closing fence and emits **one** `cx.elt("Frontmatter", from, to)` element, similar
+to how fenced code blocks consume-and-emit. Consult the installed package's types
+for the exact line-advance API; do not guess from this sketch.
+
+**Regression tests (the part that would have caught this):**
+
+- For `"---\ntitle: doc\ntags: [a, b]\n---\n\n# Head\nbody"`:
+  - `Frontmatter` node exists and its `to` ≤ the offset where the closing fence
+    line ends (compute from the doc string in the test);
+  - `ATXHeading1` exists with `from` > `Frontmatter.to`;
+  - iterating the tree, `ATXHeading1` is NOT a descendant of `Frontmatter`.
+- Existing presence tests (`obsidian.test.ts`, `corpus.test.ts`) stay green.
+- The later-`---`-is-HorizontalRule test stays green.
+
+**Cleanup:** delete the diagnostic script `dump_tree.ts` before the final commit
+of plan 003 — it must not ship.
+
+**Verify:** `npm run typecheck && npm test && npm run build` all exit 0, then
+resume plan 003 Step 5 (the Properties widget should now wrap only the
+frontmatter block).

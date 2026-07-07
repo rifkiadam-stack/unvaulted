@@ -245,3 +245,25 @@ Stop and report back (do not improvise) if:
   the CLI path this plan already consumes — no code change expected there.
 - Reviewer should scrutinize: save-failure paths (error surfaced, close aborted,
   no data loss) and that `fileSession.ts` stayed free of Tauri imports.
+
+## Amendment — 2026-07-07 — inline title (operator request during plan 003 smoke)
+
+Add one UI element to this plan's scope: an **Obsidian-style inline title**
+above the editor content.
+
+- Content: the opened file's **basename without extension** (`SKILL.md` →
+  `SKILL`). Derive it in `fileSession.ts` (pure function, e.g.
+  `inlineTitle(s: SessionState): string | null` — null when no file is open;
+  unit-test it alongside `windowTitle`).
+- Rendering: a non-editable element ABOVE the CodeMirror content (outside the
+  editor's line numbering entirely — the operator calls it "line 0"), class
+  `uv-inline-title`, structural CSS only (large bold text; plan 005 skins it).
+  Simplest correct placement: a plain `<div>` injected before the editor in the
+  app layout, updated when a file loads. Do not implement it as an editor
+  decoration — it must not be part of the document or selectable as text.
+- Read-only by design: changing it = renaming the file, which is out of MVP
+  scope (no rename affordance). No click/edit handlers.
+- Empty/untitled state: hidden (no file open → no title).
+- Manual smoke (add to Step 6 matrix): open a file → its basename appears as
+  the big title above line 1; the title is not selectable/editable; opening a
+  different file updates it.
