@@ -16,13 +16,20 @@ class TaskCheckboxWidget extends WidgetType {
     input.className = "uv-task-checkbox";
     input.checked = this.checked;
     input.onmousedown = (e) => {
-      e.preventDefault();
-      const newText = this.checked ? "[ ]" : "[x]";
+      // Don't preventDefault, allow the checkbox to be clicked natively
+      // But we must dispatch the CodeMirror change so it sticks.
+    };
+    input.onchange = (e) => {
+      const newText = input.checked ? "[x]" : "[ ]";
       view.dispatch({
         changes: { from: this.from, to: this.to, insert: newText }
       });
     };
     return input;
+  }
+  
+  ignoreEvent() {
+    return false; // CodeMirror should let events flow to this DOM element
   }
 }
 

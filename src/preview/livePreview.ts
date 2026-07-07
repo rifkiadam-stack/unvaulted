@@ -10,6 +10,7 @@ import { buildTaskDecorations } from "./widgets/task";
 import { buildImageDecorations, uvBasePath } from "./widgets/image";
 import { buildPropertiesDecorations } from "./widgets/properties";
 import { buildTableDecorations } from "./widgets/table";
+import { buildListMarkDecorations } from "./widgets/list";
 
 export { uvOpenExternal, uvBasePath };
 
@@ -31,6 +32,7 @@ function buildDecorations(state: EditorState): DecorationSet {
       buildImageDecorations(state, node, decos);
       buildPropertiesDecorations(state, node, decos);
       buildTableDecorations(state, node, decos);
+      buildListMarkDecorations(state, node, decos);
     }
   });
 

@@ -14,6 +14,11 @@ class PropertiesWidget extends WidgetType {
     const div = document.createElement("div");
     div.className = "uv-properties";
     
+    const header = document.createElement("div");
+    header.className = "uv-properties-header";
+    header.textContent = "Properties";
+    div.appendChild(header);
+    
     const lines = this.text.split("\n");
     for (const line of lines) {
       if (line.trim() === "---") continue;
