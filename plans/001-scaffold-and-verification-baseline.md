@@ -211,3 +211,99 @@ Stop and report back (do not improvise) if:
   bundler targets yet.
 - Reviewer should scrutinize: dependency list minimalism (nothing beyond the named
   packages) and that strict TypeScript is actually on.
+
+## Review — 2026-07-07
+
+**Verdict: PASS.**
+
+Reviewed range `f991035..feat/001-scaffold` (5 commits, one per step) via
+`review-external`. Working tree was clean and identical to the executor tip
+(`b6984c2`); gates were re-run against that committed state (fast incremental run,
+`node_modules`/`target` already present — artifacts are gitignored, so this is
+equivalent to a disposable-worktree run without the full recompile cost).
+
+Done criteria — re-verified independently (not trusting the executor's report):
+
+| Criterion | Command | Result |
+|-----------|---------|--------|
+| Typecheck | `npm run typecheck` | exit 0 |
+| Unit tests | `npm test` | 2/2 pass, exit 0 |
+| Frontend build | `npm run build` | exit 0, `dist/` produced |
+| Native compile | `cargo check` (src-tauri) | exit 0, Finished |
+| Scope | `git diff --stat f991035..feat/001-scaffold` | every file traces to a step; nothing out of scope (only `plans/README.md` status touched) |
+| Interface contract | `src/editor.ts` | `createEditor(parent, initialText): EditorView` present — stable for plans 002–005 |
+
+Code is honest and minimal: tests assert real behavior (not gamed), no jsdom added
+(followed guidance), scaffold matches the plan's config exactly (identifier
+`com.rifkiadam.unvaulted`, 900×700, the 5 named scripts).
+
+**Minor notes (non-blocking, no action required):**
+- `.gitignore` was replaced (prior 218-line template → minimal 4-line) — legitimate
+  per Step 1 ("at least these 3 entries"); the 3 required ignores are present and no
+  build artifacts were committed.
+- `package.json` version is `1.0.0` (`npm init -y` default) while the Rust crate is
+  `0.1.0` — cosmetic mismatch, out of this plan's scope.
+
+**Remaining (operator):** Step 5 manual smoke (`npm run tauri dev` opens an editable
+window) is the one criterion not machine-verifiable — the executor's walkthrough
+correctly asked the operator to confirm it. Once confirmed, this plan is ready to
+merge into `main`. Merge is the operator's decision (reviewer never merges).
+
+### Update after smoke test — 2026-07-07 — verdict revised to CHANGES REQUESTED
+
+The manual smoke (Step 5) **failed**: `npm run tauri dev` crashes before the window
+opens with:
+
+```
+Error: EBUSY: resource busy or locked, watch
+'...\src-tauri\target\debug\build\...\build_script_build-*.exe'
+  ... Emitted 'error' event on FSWatcher instance ...
+Error The "beforeDevCommand" terminated with a non-zero status code.
+```
+
+**Root cause — a plan defect, not an executor error.** Step 1's `vite.config.ts`
+instruction omitted the standard Tauri watch-ignore. Vite's dev-server file watcher
+watches the whole project including `src-tauri/target/`; while Cargo compiles, it
+locks build artifacts there, and Vite's watch on a locked `.exe` throws `EBUSY`,
+killing `beforeDevCommand`. The gate commands (typecheck/test/build/`cargo check`)
+don't run the watcher, so this only surfaces at `tauri dev`.
+
+**Correction for the executor (one commit, then re-run smoke):**
+
+In `vite.config.ts`, add a `server.watch.ignored` entry so the dev server never
+watches the Rust build output. Final config:
+
+```ts
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  clearScreen: false,
+  server: {
+    port: 1420,
+    strictPort: true,
+    watch: {
+      ignored: ["**/src-tauri/**"],
+    },
+  },
+});
+```
+
+- **Scope**: `vite.config.ts` only. Touch nothing else.
+- **Verify**: `npm run tauri dev` launches a window titled "Unvaulted" showing an
+  editable editor, no `EBUSY` crash. Also re-confirm `npm run typecheck && npm test
+  && npm run build` still exit 0 (the change is watcher-only, so they should).
+- **Commit**: `001: ignore src-tauri in vite watcher (fix tauri dev EBUSY)`.
+
+Operator hygiene before retrying: close the terminal where `tauri dev` crashed and
+kill any stray `node`/vite processes (a zombie dev server holding port 1420 will
+make the next run fail with `strictPort`).
+
+Once the window opens cleanly, this plan is DONE and ready to merge.
+
+### Re-review — 2026-07-07 — verdict PASS
+
+Fix applied in commit `3d09c51` (`vite.config.ts` only, 3 insertions —
+`server.watch.ignored: ["**/src-tauri/**"]`). Gates re-run: typecheck / test /
+build all exit 0. Operator confirmed `npm run tauri dev` opens the "Unvaulted"
+window with an editable editor, no `EBUSY`. **Plan 001 complete — ready to merge
+`feat/001-scaffold` → `main`.**
