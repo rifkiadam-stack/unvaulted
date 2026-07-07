@@ -12,6 +12,8 @@ import { buildPropertiesDecorations } from "./widgets/properties";
 import { buildTableDecorations } from "./widgets/table";
 import { buildListMarkDecorations } from "./widgets/list";
 
+import "./preview.css";
+
 export { uvOpenExternal, uvBasePath };
 
 function buildDecorations(state: EditorState): DecorationSet {
