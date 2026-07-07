@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { createPreviewState, decorationsOf } from "./harness";
+import { taskToggleChange } from "../../src/preview/widgets/task";
 
 describe("Block basics", () => {
   it("renders HR widget when cursor is away", () => {
@@ -45,6 +46,18 @@ describe("Block basics", () => {
     expect(widgets[0].from).toBe(2);
     expect(widgets[0].to).toBe(5);
     expect((widgets[0].spec.widget as any).checked).toBe(false);
+
+    // Toggle to checked
+    let newState = state.update({
+      changes: taskToggleChange(true, widgets[0].from, widgets[0].to)
+    }).state;
+    expect(newState.doc.toString()).toBe("- [x] task");
+
+    // Toggle back to unchecked
+    newState = newState.update({
+      changes: taskToggleChange(false, widgets[0].from, widgets[0].to)
+    }).state;
+    expect(newState.doc.toString()).toBe("- [ ] task");
   });
 
   it("renders block image widget for image on its own line", () => {

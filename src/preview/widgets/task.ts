@@ -15,18 +15,17 @@ class TaskCheckboxWidget extends WidgetType {
     input.type = "checkbox";
     input.className = "uv-task-checkbox";
     input.checked = this.checked;
-    input.onmousedown = (e) => {
-      // Don't preventDefault, allow the checkbox to be clicked natively
-      // But we must dispatch the CodeMirror change so it sticks.
-    };
     input.onchange = (e) => {
-      const newText = input.checked ? "[x]" : "[ ]";
       view.dispatch({
-        changes: { from: this.from, to: this.to, insert: newText }
+        changes: taskToggleChange(input.checked, this.from, this.to)
       });
     };
     return input;
   }
+}
+
+export function taskToggleChange(checked: boolean, from: number, to: number) {
+  return { from, to, insert: checked ? "[x]" : "[ ]" };
 }
 
 export function buildTaskDecorations(state: EditorState, node: SyntaxNodeRef, decos: Range<Decoration>[]) {
