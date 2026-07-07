@@ -5,6 +5,7 @@ import { buildInlineDecorations } from "./widgets/inline";
 import { buildLinkDecorations, uvOpenExternal } from "./widgets/links";
 import { buildHrDecorations } from "./widgets/hr";
 import { buildBlockquoteDecorations } from "./widgets/blockquote";
+import { buildCalloutDecorations } from "./widgets/callout";
 import { buildTaskDecorations } from "./widgets/task";
 import { buildImageDecorations, uvBasePath } from "./widgets/image";
 
@@ -18,7 +19,12 @@ function buildDecorations(state: EditorState): DecorationSet {
       buildInlineDecorations(state, node, decos);
       buildLinkDecorations(state, node, decos);
       buildHrDecorations(state, node, decos);
-      buildBlockquoteDecorations(state, node, decos);
+      
+      const isCallout = buildCalloutDecorations(state, node, decos);
+      if (!isCallout) {
+        buildBlockquoteDecorations(state, node, decos);
+      }
+      
       buildTaskDecorations(state, node, decos);
       buildImageDecorations(state, node, decos);
     }
