@@ -1,6 +1,6 @@
 import { invoke } from '@tauri-apps/api/core';
 import { readTextFile } from '@tauri-apps/plugin-fs';
-import { open, message, ask } from '@tauri-apps/plugin-dialog';
+import { open, message, ask, save } from '@tauri-apps/plugin-dialog';
 import { openUrl } from '@tauri-apps/plugin-opener';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { listen } from '@tauri-apps/api/event';
@@ -35,7 +35,6 @@ export function tauriPlatform(): Platform {
       return Array.isArray(selected) ? selected[0] : selected;
     },
     async showSaveDialog() {
-      const { save } = await import('@tauri-apps/plugin-dialog');
       const selected = await save({
         filters: [{ name: 'Markdown', extensions: ['md', 'markdown'] }]
       });
