@@ -27,10 +27,6 @@ class TaskCheckboxWidget extends WidgetType {
     };
     return input;
   }
-  
-  ignoreEvent() {
-    return false; // CodeMirror should let events flow to this DOM element
-  }
 }
 
 export function buildTaskDecorations(state: EditorState, node: SyntaxNodeRef, decos: Range<Decoration>[]) {
