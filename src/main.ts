@@ -39,7 +39,11 @@ let view: EditorView;
 
 async function updateState(newState: SessionState) {
   session = newState;
-  await platform.setTitle(windowTitle(session));
+  try {
+    await platform.setTitle(windowTitle(session));
+  } catch (e) {
+    console.error("Failed to set window title:", e);
+  }
   
   const iTitle = inlineTitle(session);
   if (iTitle) {
