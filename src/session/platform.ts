@@ -126,7 +126,11 @@ export function tauriPlatform(): Platform {
         const allowed = await cb();
         if (allowed) {
           closing = true;
-          win.destroy();
+          try {
+            await win.destroy();
+          } catch (e) {
+            console.error("Failed to destroy window:", e);
+          }
         }
       });
     }
