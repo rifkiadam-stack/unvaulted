@@ -122,28 +122,27 @@ async function attemptClose(): Promise<boolean> {
   return true;
 }
 
-const shortcuts = keymap.of([
-  {
-    key: "Mod-s",
-    preventDefault: true,
-    run: () => { doSave(); return true; }
-  },
-  {
-    key: "Mod-o",
-    preventDefault: true,
-    run: () => { doOpen(); return true; }
-  },
-  {
-    key: "Mod-w",
-    preventDefault: true,
-    run: () => {
-      attemptClose().then(allowed => {
-        if (allowed) getCurrentWindow().close();
-      });
-      return true;
+document.addEventListener('keydown', (e) => {
+  const isMod = navigator.platform.toLowerCase().includes('mac') ? e.metaKey : e.ctrlKey;
+  if (isMod && !e.shiftKey && !e.altKey) {
+    switch (e.key.toLowerCase()) {
+      case 's':
+        e.preventDefault();
+        doSave();
+        break;
+      case 'o':
+        e.preventDefault();
+        doOpen();
+        break;
+      case 'w':
+        e.preventDefault();
+        attemptClose().then(allowed => {
+          if (allowed) getCurrentWindow().close();
+        });
+        break;
     }
   }
-]);
+});
 
 const updateListener = EditorView.updateListener.of((update) => {
   if (update.docChanged) {
@@ -154,7 +153,7 @@ const updateListener = EditorView.updateListener.of((update) => {
   }
 });
 
-view = createEditor(editorContainer, '', [shortcuts, updateListener]);
+view = createEditor(editorContainer, '', [updateListener]);
 
 platform.onCloseRequested(attemptClose);
 platform.onFileDrop(loadPath);
