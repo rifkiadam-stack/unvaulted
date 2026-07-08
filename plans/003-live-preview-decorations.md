@@ -522,3 +522,24 @@ both ways and asserts the document text (`"- [x] task"` ↔ `"- [ ] task"`).
 Gates re-run: typecheck / tests / build all green. **Plan 003 complete — ready
 to merge `feat/003-live-preview` → `main`.** Plan 004 (file session + app shell,
 including the inline-title amendment) is unblocked.
+
+## Follow-up note — 2026-07-08 — `**bold**` marks not hiding (found during 004 smoke)
+
+Operator reported on a real, dense document that `StrongEmphasis` (`**bold**`)
+renders bold but the `**` delimiter marks stay visible even when the cursor is
+elsewhere — despite this plan's inline-mark hiding tests passing on small inputs.
+This is a live-preview reveal issue owned by THIS plan, to be handled as a small
+dedicated follow-up (candidate a `003.1` fix on its own branch off the latest
+`main`, after 004 lands) — NOT inside plan 004.
+
+Investigation checklist for whoever picks it up:
+- Reproduce on a multi-line/nested-list document (the operator's file had bold
+  inside list items). First confirm whether it's genuinely broken or just the
+  reveal-on-cursor behavior being read as a bug: put the cursor on a *different*
+  line and check whether that line's `**` hides. If it hides → working as
+  designed; if it stays → real bug.
+- If real: likely an interaction between the list-marker rendering (C1) and the
+  inline `StrongEmphasis` decoration pass — e.g. a decoration-range overlap or
+  the `**` hide-decoration not being emitted when the mark sits after a
+  `ListMark`. Add a regression test with `- **bold** item` and assert the `**`
+  hide-decorations exist when the selection is off that line.

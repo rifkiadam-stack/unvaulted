@@ -267,3 +267,175 @@ above the editor content.
 - Manual smoke (add to Step 6 matrix): open a file → its basename appears as
   the big title above line 1; the title is not selectable/editable; opening a
   different file updates it.
+
+## Correction round 1 — 2026-07-07 — Step 6 smoke: three app-shell bugs
+
+Operator smoke results: drag-drop load PASS. Everything else failed —
+`*` never appears on typing, Ctrl+O/Ctrl+S do nothing, inline title never shows,
+and the window won't close even after answering the save dialog. Reviewer read
+the code; the failures reduce to three linked root causes, two of which trace to
+under-specification in this plan (owned by the plan author).
+
+**Bug A (root cause of most symptoms) — missing window `set-title` permission
+cascades through `updateState`.** `src/session/platform.ts:setTitle` calls
+`getCurrentWindow().setTitle(...)`, but `src-tauri/capabilities/default.json`
+grants only `core:default` (+dialog/opener/fs) — it does NOT grant
+`core:window:allow-set-title`, so `setTitle` **rejects**. In `main.ts:updateState`,
+`await platform.setTitle(...)` is line 1 of the function; it runs BEFORE the
+inline-title and empty-hint updates, so its rejection aborts `updateState`
+mid-way every time. That single failure explains: no `*` in the title, inline
+title never appears, empty hint never hides — and it also makes `doSave()` return
+`false` (its `await updateState(...)` throws inside the try), which is why
+choosing "save" on close does nothing. Two-part fix:
+1. Add `"core:window:allow-set-title"` to the `permissions` array in
+   `src-tauri/capabilities/default.json`.
+2. Defense-in-depth: in `updateState`, wrap the `setTitle` call in its own
+   try/catch (log and continue) so a title failure can never again abort the
+   inline-title / hint / dirty-indicator updates. Title is cosmetic; it must not
+   gate core UI.
+
+**Bug B (plan-author error — Step 4 instruction was wrong) — global shortcuts
+only fire when the editor is focused.** Step 4 said to register Ctrl+O/S/W via
+CodeMirror `keymap.of([...])`. A CodeMirror keymap only fires while the editor
+has DOM focus, so at the empty-state screen (nothing focused yet) Ctrl+O is dead,
+and the webview may also swallow Ctrl+S ("save page") before CodeMirror sees it.
+Fix: register these three as **window-level** shortcuts — a single
+`document.addEventListener('keydown', ...)` (or Tauri's global-shortcut plugin;
+prefer the plain DOM listener, no new dependency) that matches
+Ctrl/Cmd+O/S/W, calls `e.preventDefault()`, and invokes `doOpen` / `doSave` /
+the close flow. Remove those three from the CodeMirror keymap (leave all other
+editor keybindings alone). This makes them work regardless of focus — correct
+for a Notepad-style app.
+
+**Bug C (Tauri v2 async-close pattern) — window never closes even when allowed.**
+`platform.ts:onCloseRequested` awaits the callback and only then calls
+`event.preventDefault()`. In Tauri v2 the close event must be prevented
+**synchronously**; deciding after an `await` is too late and leaves the window in
+a stuck state. Correct pattern:
+```ts
+onCloseRequested(cb) {
+  const win = getCurrentWindow();
+  let closing = false;
+  win.onCloseRequested(async (event) => {
+    if (closing) return;             // allow the programmatic close through
+    event.preventDefault();          // always prevent first, synchronously
+    const allowed = await cb();
+    if (allowed) {
+      closing = true;
+      win.destroy();                 // destroy() bypasses onCloseRequested (no loop); close() would re-fire it
+    }
+  });
+}
+```
+Apply the same "prevent-first, then act" shape to the `Mod-w` path if it stays.
+
+**Also fix the confirm dialog to honor Cancel (currently impossible to cancel).**
+`confirmClose` uses `ask()` (Yes/No) and maps to only `save`/`discard` — the
+`cancel` branch the session logic supports can never be reached, so a user who
+opens the close dialog is forced to either save or discard. The PRD calls for
+Save / Don't save / **Cancel**. Since Tauri's native `ask` is two-button,
+implement the three-choice dialog as a small in-app HTML modal (structural only;
+plan 005 skins it) returning `'save' | 'discard' | 'cancel'`, OR — acceptable
+MVP fallback — layer two native dialogs (first `ask` "Save changes?" → Yes/No,
+then only on the path that needs it a `confirm` for Cancel); if you take the
+fallback, note it. The in-app modal is preferred and simpler to reason about.
+
+**Verify after fixes (Step 6 smoke re-run, report each):** empty-state Ctrl+O
+opens the dialog; typing shows `*` in the title and reveals nothing broke;
+inline title appears on open/drop; Ctrl+S clears `*` and writes the file (check
+in another editor, line endings preserved); close-with-unsaved shows
+Save/Don't-save/Cancel, and each button does the right thing (save→writes+closes,
+don't-save→closes, cancel→stays); Ctrl+W same. Gates unchanged
+(`npm run typecheck && npm test && npm run build`). Commit per fix, prefix `004:`.
+
+## Correction round 2 — 2026-07-08 — close still broken: missing window mutate permissions
+
+Round-1 fixes verified in code (set-title permission added, updateState guarded,
+global shortcuts, 3-choice modal, prevent-first close pattern). But close STILL
+fails: after picking a dialog button the window does not close, and Ctrl+W does
+nothing.
+
+**Root cause — same class as Bug A.** Tauri v2 window operations are deny-by-
+default. `platform.ts:onCloseRequested` calls `win.destroy()`, and `main.ts`'s
+Ctrl+W calls `getCurrentWindow().close()`, but `capabilities/default.json` grants
+neither `core:window:allow-close` nor `core:window:allow-destroy`. Both reject
+silently (the rejection is swallowed — `destroy()` isn't awaited/caught), so the
+window stays open even when `allowed === true`. This mirrors the set-title bug
+exactly: a window mutation with no permission.
+
+**Fix:**
+1. Add both to the `permissions` array in `src-tauri/capabilities/default.json`:
+   `"core:window:allow-close"`, `"core:window:allow-destroy"`.
+2. In `platform.ts:onCloseRequested`, await and catch `win.destroy()` so any
+   future permission/error surfaces in the console instead of vanishing:
+   `try { await win.destroy(); } catch (e) { console.error('destroy failed', e); }`.
+3. Sanity: confirm the Ctrl+W path (`getCurrentWindow().close()`) now also works
+   — `close()` fires `onCloseRequested`, which runs the guard→modal→destroy flow,
+   so it should route correctly once `allow-close`+`allow-destroy` exist.
+
+**Verify (report each):** with unsaved changes, click the window X → modal
+appears → "Don't Save" closes the window; repeat → "Save" writes then closes;
+repeat → "Cancel" keeps it open; Ctrl+W behaves identically; a clean (saved)
+window closes immediately with no modal. If the modal does NOT appear at all,
+that's a *different* failure — report it with any console output rather than
+guessing. Commit `004: add window close/destroy permissions`.
+
+**Explicitly deferred (NOT plan 004 — routed to their proper plans, do not fix
+here):** operator also reported (a) clicks landing ~one line off, (b) long lines
+causing horizontal scroll / text clipped at the left edge even fullscreen —
+both are editor **layout/line-height/wrapping** issues owned by plan 005 (theme:
+readable column, line wrapping, editor chrome); and (c) `**bold**` delimiter
+marks not hiding — a live-preview reveal issue owned by plan 003. These are
+recorded in plan 005 and a plan 003 follow-up note respectively. Plan 004 closes
+on close working + the Step-6 file-ops matrix; it does not own visual polish.
+
+## Review — 2026-07-08
+
+**Verdict: CHANGES REQUESTED — one item (uncommitted dependencies).**
+
+Reviewed range `main..feat/004-file-session` (10 commits). Gates in the working
+tree: typecheck PASS, **67/67 tests PASS**, build PASS. Operator confirmed the
+full Step-6 matrix works after round 2: empty-state Ctrl+O, typing shows `*`,
+inline title on open/drop, Ctrl+S saves and clears `*`, and the 3-choice close
+dialog (Save/Don't-save/Cancel) all behave correctly. Verified in detail:
+`fileSession.ts` stays pure (no `@tauri-apps` imports); its tests cover the whole
+contract (empty, CRLF normalize + save round-trip, dirty edit→undo→save
+transitions, `windowTitle` all forms, `inlineTitle` basename extraction); all
+three window permissions (`set-title`, `close`, `destroy`) present; `save_atomic`
+writes-temp-then-renames in the same dir; close pattern is prevent-first →
+`destroy()`.
+
+**Blocking item — required JS dependencies are uncommitted.** `src/session/
+platform.ts` imports `@tauri-apps/plugin-dialog`, `plugin-fs`, and
+`plugin-opener`, and `package.json` + `package-lock.json` in the working tree
+declare them — but those two files are **not committed** on this branch (the
+committed `package.json` at HEAD lacks all three). A fresh checkout would
+`npm install` without them and fail to build. Gates only pass here because the
+working tree has them installed. (The Rust-side plugin crates ARE committed in
+`Cargo.toml`/`Cargo.lock`; only the JS side is missing.)
+
+**Correction (executor, one commit `004: commit tauri plugin JS deps`):**
+`git add package.json package-lock.json && git commit`. Do NOT commit the
+incidental `src-tauri/Cargo.toml` `features = []` whitespace churn (reviewer
+will discard it at merge, as in prior plans). Re-run gates to confirm still green.
+
+**Non-blocking notes (recorded, no action):**
+- `platform.ts:confirmClose` modal text still reads "Do you want to save changes
+  to <file>?" with Save/Don't-Save/Cancel buttons — fine; styling lands in 005.
+- `main.ts` Ctrl+W calls `getCurrentWindow().close()` (routes through the
+  onCloseRequested guard) rather than `attemptClose()` directly — both reach the
+  same modal→destroy path now that permissions exist; acceptable.
+- Layout/click-accuracy/line-wrapping and `**bold**` hiding remain routed to
+  plans 005 and 003 respectively (see this file's Correction round 2, and the
+  amendments in those plans).
+
+Once the deps are committed, plan 004 is DONE and ready to merge.
+
+### Re-review — 2026-07-08 — verdict PASS
+
+Correction landed in `c044adc`: `package.json` + `package-lock.json` at HEAD now
+declare `@tauri-apps/plugin-dialog`/`-fs`/`-opener` (committed-state verified via
+`git show HEAD:package.json`). Gates green (typecheck / 67 tests / build).
+**Plan 004 complete — ready to merge `feat/004-file-session` → `main`.** Plan 005
+(theme) is unblocked and now also carries the layout/wrapping/click-accuracy
+amendment from 004's smoke; the `**bold**` follow-up remains queued against 003.

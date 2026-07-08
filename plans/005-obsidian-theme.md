@@ -238,3 +238,27 @@ Stop and report back (do not improvise) if:
   fails by design — that's the reminder to style them.
 - Reviewer should scrutinize: no behavior diffs snuck in (pure CSS/theme plan),
   and the light palette actually activates via OS preference, not a hardcoded mode.
+
+## Amendment — 2026-07-08 — editor layout issues found during plan 004 smoke
+
+Two editor-layout problems surfaced while smoke-testing plan 004 (routed here
+because they are layout/chrome, which this plan owns — do NOT fix them in 004):
+
+1. **Long lines scroll horizontally; content clips at the left edge even
+   maximized.** Enable soft wrapping so lines wrap like Obsidian: add
+   `EditorView.lineWrapping` to the editor extensions (in `src/editor.ts` or the
+   editor-theme extension bundle). Also give the editor a proper full-height flex
+   context so it fills the window and the readable column centers correctly:
+   `#app` a `display:flex; flex-direction:column; height:100vh`; the editor
+   container `flex:1; min-height:0`; the inline-title row `flex:0 0 auto`. The
+   readable column (`.cm-content { max-width; margin:auto }`) this plan already
+   specifies then lands cleanly.
+2. **Clicks land ~one line off (must click between lines to hit the intended
+   line).** Almost certainly a line-height mismatch introduced by the heading
+   font-scale marks (`.uv-h1..h6 { font-size }`) applied to inline spans without
+   a matching line box. When this plan sets the real type scale, set an explicit
+   consistent `line-height` on `.cm-line` and on the heading classes so
+   CodeMirror's vertical measurement matches the rendered box; verify by clicking
+   directly on several lines (including heading lines) and confirming the caret
+   lands where clicked. If it persists after line-height is normalized, report
+   the DOM/measurement details — do not paper over it with offsets.
