@@ -136,9 +136,7 @@ document.addEventListener('keydown', (e) => {
         break;
       case 'w':
         e.preventDefault();
-        attemptClose().then(allowed => {
-          if (allowed) getCurrentWindow().close();
-        });
+        getCurrentWindow().close();
         break;
     }
   }

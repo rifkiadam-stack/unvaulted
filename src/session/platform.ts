@@ -83,10 +83,15 @@ export function tauriPlatform(): Platform {
       });
     },
     onCloseRequested(cb: () => Promise<boolean>) {
-      getCurrentWindow().onCloseRequested(async (event) => {
+      const win = getCurrentWindow();
+      let closing = false;
+      win.onCloseRequested(async (event) => {
+        if (closing) return;
+        event.preventDefault();
         const allowed = await cb();
-        if (!allowed) {
-          event.preventDefault();
+        if (allowed) {
+          closing = true;
+          win.destroy();
         }
       });
     }
