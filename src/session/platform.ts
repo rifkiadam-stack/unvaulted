@@ -40,31 +40,66 @@ export function tauriPlatform(): Platform {
       });
       return selected;
     },
-    async confirmClose(fileName: string) {
-      // In Tauri v2, we can't easily build a 3-button custom dialog purely natively,
-      // but 'ask' gives us Yes/No which we might interpret as Save/Discard, plus Cancel?
-      // Wait, 'ask' from plugin-dialog only gives boolean.
-      // If we need a 3-button dialog, we could use a custom HTML modal or try to use message box.
-      // For now, ask returns boolean. Let's use `ask` for "Do you want to save?"
-      // But standard confirm Close has 3 options.
-      // `ask` gives Yes/No. `message` has kind: 'warning'.
-      // Let's implement a simple heuristic: ask "Do you want to save changes to <file>?"
-      const wantsSave = await ask(`Do you want to save changes to ${fileName}?`, {
-        title: 'Unvaulted',
-        kind: 'warning'
+    async confirmClose(fileName: string): Promise<'save' | 'discard' | 'cancel'> {
+      return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.className = 'uv-modal-overlay';
+        overlay.style.position = 'fixed';
+        overlay.style.top = '0';
+        overlay.style.left = '0';
+        overlay.style.width = '100vw';
+        overlay.style.height = '100vh';
+        overlay.style.backgroundColor = 'rgba(0,0,0,0.5)';
+        overlay.style.display = 'flex';
+        overlay.style.alignItems = 'center';
+        overlay.style.justifyContent = 'center';
+        overlay.style.zIndex = '9999';
+
+        const modal = document.createElement('div');
+        modal.className = 'uv-modal';
+        modal.style.backgroundColor = 'var(--bg-color, #fff)';
+        modal.style.color = 'var(--text-color, #000)';
+        modal.style.padding = '20px';
+        modal.style.borderRadius = '8px';
+        modal.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+        modal.style.maxWidth = '400px';
+        modal.style.fontFamily = 'system-ui, sans-serif';
+
+        const text = document.createElement('p');
+        text.textContent = `Do you want to save changes to ${fileName}?`;
+        text.style.margin = '0 0 20px 0';
+        modal.appendChild(text);
+
+        const btnContainer = document.createElement('div');
+        btnContainer.style.display = 'flex';
+        btnContainer.style.justifyContent = 'flex-end';
+        btnContainer.style.gap = '10px';
+
+        const saveBtn = document.createElement('button');
+        saveBtn.textContent = 'Save';
+        const discardBtn = document.createElement('button');
+        discardBtn.textContent = "Don't Save";
+        const cancelBtn = document.createElement('button');
+        cancelBtn.textContent = 'Cancel';
+
+        const close = (result: 'save' | 'discard' | 'cancel') => {
+          document.body.removeChild(overlay);
+          resolve(result);
+        };
+
+        saveBtn.onclick = () => close('save');
+        discardBtn.onclick = () => close('discard');
+        cancelBtn.onclick = () => close('cancel');
+
+        btnContainer.appendChild(saveBtn);
+        btnContainer.appendChild(discardBtn);
+        btnContainer.appendChild(cancelBtn);
+        modal.appendChild(btnContainer);
+        overlay.appendChild(modal);
+
+        document.body.appendChild(overlay);
+        saveBtn.focus();
       });
-      // But how do we distinguish Cancel?
-      // Actually, `@tauri-apps/plugin-dialog` has `message` and `ask` and `confirm`.
-      // `ask` (Yes=true, No=false).
-      // `confirm` (Ok=true, Cancel=false).
-      // If we can't do a 3-button natively, we'll return 'save' or 'discard'.
-      // Wait, let's look at `ask`. If user closes the window, what does it return?
-      // If we just return 'save' or 'discard', we lose 'cancel'.
-      // We will emulate it as best as possible.
-      // Since it's a minimal notepad, we will just return 'save' if true, 'discard' if false.
-      // Note: A true 3-button dialog requires a custom HTML modal or a more advanced Rust dialog binding.
-      // The instructions say: "confirmClose(fileName: string): Promise<'save' | 'discard' | 'cancel'>"
-      return wantsSave ? 'save' : 'discard';
     },
     async setTitle(title: string) {
       await getCurrentWindow().setTitle(title);
