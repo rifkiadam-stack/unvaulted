@@ -1,3 +1,4 @@
+import "./theme/theme.css";
 import { createEditor } from "./editor";
 import { keymap } from "@codemirror/view";
 import { EditorView } from "@codemirror/view";
@@ -21,13 +22,19 @@ const platform = tauriPlatform();
 const appDiv = document.querySelector('#app') as HTMLElement;
 appDiv.innerHTML = '';
 appDiv.style.position = 'relative';
+appDiv.style.display = 'flex';
+appDiv.style.flexDirection = 'column';
+appDiv.style.height = '100vh';
 
 const titleDiv = document.createElement('div');
 titleDiv.className = 'uv-inline-title';
 titleDiv.style.display = 'none';
+titleDiv.style.flex = '0 0 auto';
 appDiv.appendChild(titleDiv);
 
 const editorContainer = document.createElement('div');
+editorContainer.style.flex = '1';
+editorContainer.style.minHeight = '0';
 appDiv.appendChild(editorContainer);
 
 const emptyHint = document.createElement('div');

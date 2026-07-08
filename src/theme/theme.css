@@ -1,0 +1,304 @@
+:root {            /* dark (default reference) */
+  --uv-bg:            #1e1e1e;
+  --uv-bg-secondary:  #262626;
+  --uv-text:          #dadada;
+  --uv-text-muted:    #999999;
+  --uv-text-faint:    #666666;
+  --uv-accent:        #8a5cf5;
+  --uv-link:          #8a5cf5;
+  --uv-highlight-bg:  rgba(255, 208, 0, 0.4);
+  --uv-code-bg:       #2a2a2a;
+  --uv-border:        #3f3f3f;
+  --uv-selection:     rgba(138, 92, 245, 0.30);
+  --uv-hr:            #3f3f3f;
+  
+  --uv-callout-note:     #448aff;
+  --uv-callout-info:     #00b8d4;
+  --uv-callout-tip:      #00bfa5;
+  --uv-callout-success:  #09ad7a;
+  --uv-callout-question: #dba642;
+  --uv-callout-warning:  #ec7500;
+  --uv-callout-danger:   #e93147;
+  --uv-callout-quote:    #9e9e9e;
+}
+
+@media (prefers-color-scheme: light) { 
+  :root {
+    --uv-bg:            #ffffff;
+    --uv-bg-secondary:  #f6f6f6;
+    --uv-text:          #222222;
+    --uv-text-muted:    #808080;
+    --uv-text-faint:    #aaaaaa;
+    --uv-accent:        #7b52ee;
+    --uv-link:          #7b52ee;
+    --uv-highlight-bg:  rgba(255, 208, 0, 0.4);
+    --uv-code-bg:       #f0f0f0;
+    --uv-border:        #e0e0e0;
+    --uv-selection:     rgba(123, 82, 238, 0.20);
+    --uv-hr:            #e0e0e0;
+  }
+}
+
+body {
+  background-color: var(--uv-bg);
+  color: var(--uv-text);
+  font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+}
+
+/* App Empty State */
+.uv-empty-hint {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--uv-text-faint);
+  text-align: center;
+  font-size: 1.2em;
+  pointer-events: none;
+}
+
+/* Inline Title */
+.uv-inline-title {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 2rem 0 1rem 0;
+  font-size: 2.2em;
+  font-weight: 800;
+  color: var(--uv-text);
+  line-height: 1.2;
+}
+
+/* CodeMirror overrides */
+.cm-editor {
+  background-color: var(--uv-bg);
+  color: var(--uv-text);
+}
+.cm-content {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding-top: 1rem;
+}
+.cm-line {
+  line-height: 1.6; /* Amendment #2 */
+  font-family: inherit;
+}
+
+/* Typography & Inlines */
+.uv-strong { font-weight: bold; }
+.uv-em { font-style: italic; }
+.uv-strike { text-decoration: line-through; }
+.uv-highlight { background-color: var(--uv-highlight-bg); border-radius: 2px; }
+.uv-code-inline {
+  font-family: Consolas, "Cascadia Code", Menlo, monospace;
+  background-color: var(--uv-code-bg);
+  padding: 0.1em 0.3em;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+/* Headings with explicit line height (Amendment #2) */
+.uv-h1 { font-size: 1.6em; font-weight: bold; line-height: 1.6; display: inline-block; margin: 0; }
+.uv-h2 { font-size: 1.4em; font-weight: bold; line-height: 1.6; display: inline-block; margin: 0; }
+.uv-h3 { font-size: 1.25em; font-weight: bold; line-height: 1.6; display: inline-block; margin: 0; }
+.uv-h4 { font-size: 1.1em; font-weight: bold; line-height: 1.6; display: inline-block; margin: 0; }
+.uv-h5 { font-size: 1.0em; font-weight: bold; line-height: 1.6; display: inline-block; margin: 0; }
+.uv-h6 { font-size: 0.9em; font-weight: bold; color: var(--uv-text-muted); line-height: 1.6; display: inline-block; margin: 0; }
+
+/* Links */
+.uv-link, .uv-wikilink, .uv-embed {
+  color: var(--uv-link);
+  text-decoration: none;
+}
+.uv-link:hover, .uv-wikilink:hover, .uv-embed:hover {
+  text-decoration: underline;
+}
+.uv-inert {
+  cursor: default;
+}
+.uv-inert:hover {
+  text-decoration: none;
+}
+
+/* Tags */
+.uv-tag {
+  background-color: color-mix(in srgb, var(--uv-accent) 12%, transparent);
+  color: var(--uv-accent);
+  border-radius: 1em;
+  padding: 0.1em 0.6em;
+  font-size: 0.9em;
+  text-decoration: none;
+}
+
+/* Checkboxes */
+.uv-task-checkbox {
+  accent-color: var(--uv-accent);
+  margin-right: 0.5em;
+  vertical-align: middle;
+}
+
+/* Blockquote */
+.uv-blockquote {
+  border-left: 3px solid var(--uv-border);
+  padding-left: 1em;
+  color: var(--uv-text-muted);
+  display: inline-block;
+}
+
+/* HR */
+.uv-hr {
+  border: none;
+  border-top: 1px solid var(--uv-hr);
+  margin: 1.5em 0;
+}
+
+/* Image */
+.uv-image {
+  max-width: 100%;
+  border-radius: 4px;
+}
+
+/* Lists */
+.uv-list-bullet {
+  color: var(--uv-text-muted);
+  font-weight: bold;
+}
+.uv-list-number {
+  color: var(--uv-text-muted);
+}
+
+/* Tables */
+.uv-table {
+  border-collapse: collapse;
+  margin: 1em 0;
+  width: auto;
+}
+.uv-table th, .uv-table td {
+  border: 1px solid var(--uv-border);
+  padding: 0.4em 0.8em;
+}
+.uv-table th {
+  background-color: var(--uv-bg-secondary);
+}
+
+/* Properties Block */
+.uv-properties {
+  background-color: var(--uv-bg-secondary);
+  border: 1px solid var(--uv-border);
+  border-radius: 6px;
+  padding: 1em;
+  margin-bottom: 1em;
+  font-size: 0.875em;
+}
+.uv-properties-header {
+  font-weight: bold;
+  color: var(--uv-text-muted);
+  margin-bottom: 0.5em;
+  border-bottom: 1px solid var(--uv-border);
+  padding-bottom: 0.5em;
+}
+.uv-property-row {
+  display: flex;
+  margin-bottom: 0.3em;
+}
+.uv-property-key {
+  width: 120px;
+  color: var(--uv-text-muted);
+}
+.uv-property-value {
+  flex: 1;
+  color: var(--uv-text);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3em;
+}
+.uv-property-chip {
+  background-color: color-mix(in srgb, var(--uv-accent) 12%, transparent);
+  color: var(--uv-accent);
+  border-radius: 4px;
+  padding: 0.1em 0.4em;
+}
+.uv-property-raw {
+  display: none;
+}
+
+/* Callouts */
+.uv-callout {
+  border-left: 4px solid var(--uv-callout-note);
+  background-color: color-mix(in srgb, var(--uv-callout-note) 10%, transparent);
+  padding: 1em;
+  border-radius: 0 4px 4px 0;
+  margin: 1em 0;
+}
+.uv-callout-title {
+  font-weight: bold;
+  color: var(--uv-callout-note);
+  margin-bottom: 0.5em;
+  display: block;
+}
+.uv-callout-body {
+  color: var(--uv-text);
+}
+
+/* Callout variants */
+.uv-callout[data-callout-type="info"] {
+  border-left-color: var(--uv-callout-info);
+  background-color: color-mix(in srgb, var(--uv-callout-info) 10%, transparent);
+}
+.uv-callout[data-callout-type="info"] .uv-callout-title { color: var(--uv-callout-info); }
+
+.uv-callout[data-callout-type="tip"] {
+  border-left-color: var(--uv-callout-tip);
+  background-color: color-mix(in srgb, var(--uv-callout-tip) 10%, transparent);
+}
+.uv-callout[data-callout-type="tip"] .uv-callout-title { color: var(--uv-callout-tip); }
+
+.uv-callout[data-callout-type="success"] {
+  border-left-color: var(--uv-callout-success);
+  background-color: color-mix(in srgb, var(--uv-callout-success) 10%, transparent);
+}
+.uv-callout[data-callout-type="success"] .uv-callout-title { color: var(--uv-callout-success); }
+
+.uv-callout[data-callout-type="question"] {
+  border-left-color: var(--uv-callout-question);
+  background-color: color-mix(in srgb, var(--uv-callout-question) 10%, transparent);
+}
+.uv-callout[data-callout-type="question"] .uv-callout-title { color: var(--uv-callout-question); }
+
+.uv-callout[data-callout-type="warning"] {
+  border-left-color: var(--uv-callout-warning);
+  background-color: color-mix(in srgb, var(--uv-callout-warning) 10%, transparent);
+}
+.uv-callout[data-callout-type="warning"] .uv-callout-title { color: var(--uv-callout-warning); }
+
+.uv-callout[data-callout-type="danger"] {
+  border-left-color: var(--uv-callout-danger);
+  background-color: color-mix(in srgb, var(--uv-callout-danger) 10%, transparent);
+}
+.uv-callout[data-callout-type="danger"] .uv-callout-title { color: var(--uv-callout-danger); }
+
+.uv-callout[data-callout-type="quote"] {
+  border-left-color: var(--uv-callout-quote);
+  background-color: color-mix(in srgb, var(--uv-callout-quote) 10%, transparent);
+}
+.uv-callout[data-callout-type="quote"] .uv-callout-title { color: var(--uv-callout-quote); }
+
+/* Modal overrides from platform.ts */
+.uv-modal {
+  background-color: var(--uv-bg-secondary) !important;
+  color: var(--uv-text) !important;
+}
+.uv-modal button {
+  background-color: var(--uv-bg);
+  color: var(--uv-text);
+  border: 1px solid var(--uv-border);
+  padding: 0.5em 1em;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.uv-modal button:hover {
+  background-color: var(--uv-selection);
+}
