@@ -543,3 +543,38 @@ Investigation checklist for whoever picks it up:
   the `**` hide-decoration not being emitted when the mark sits after a
   `ListMark`. Add a regression test with `- **bold** item` and assert the `**`
   hide-decorations exist when the selection is off that line.
+
+### Root cause found + fix — 2026-07-08 (authorized as a hotfix on the feat/005-theme branch)
+
+Confirmed a REAL bug (not reveal-on-cursor, and NOT list-specific — `**bold**`
+anywhere shows its `**`). Root cause in `src/preview/widgets/inline.ts:22`:
+`const targetMark = name === "InlineCode" ? "CodeMark" : name + "Mark";`
+For `StrongEmphasis` this yields `"StrongEmphasisMark"`, which does not exist in
+the `@lezer/markdown` grammar — bold and italic delimiters are BOTH named
+`EmphasisMark`. So the `**` mark children are never found and never hidden.
+Italic worked by luck (`Emphasis` + `"EmphasisMark"` happens to match). Slipped
+through plan-003 review because `inline.test.ts` only tested `*it*` and `## Title`
+— never `**bold**` (a test-coverage gap owned by the plan author).
+
+**Fix (one commit on the current `feat/005-theme` branch, prefix `003-hotfix:` —
+this is a live-preview/behavior fix and is the ONLY `src/preview/` change allowed
+on the theme branch; touch nothing else there):**
+1. In `inline.ts`, replace the `name + "Mark"` concatenation with an explicit map
+   of node → delimiter-mark name:
+   - `StrongEmphasis` → `EmphasisMark`
+   - `Emphasis` → `EmphasisMark`
+   - `Strikethrough` → `StrikethroughMark`
+   - `Highlight` → `HighlightMark`
+   - `InlineCode` → `CodeMark`
+   Use that map to find/hide the delimiter children (keep the existing
+   `firstChild`/`nextSibling` walk).
+2. Add regression tests in `tests/preview/inline.test.ts` for each: `**b**`
+   hides two `**` (4 replacement ranges? no — two mark ranges), `~~s~~`, `==h==`,
+   and re-confirm `*i*` still works — cursor off the span → delimiter
+   replace-decorations exist; cursor inside → none. The bold case is the one
+   that would have caught this.
+3. Gates green (`npm run typecheck && npm test && npm run build`).
+
+Because this rides the 005 branch, note it explicitly in the plan-005 report so
+the 005 review accounts for the extra `src/preview/inline.ts` + inline test diff
+(analogous to how `002-hotfix` rode the 003 branch).
