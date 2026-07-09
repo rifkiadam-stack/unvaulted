@@ -67,7 +67,7 @@ describe("Theme token spec", () => {
         const content = fs.readFileSync(dir, "utf-8");
         const matches = content.match(uvClassRegex);
         if (matches) {
-          matches.forEach(m => {
+          matches.forEach((m: string) => {
             // Ignore partial dynamic matches
             if (m !== 'uv-h' && m !== 'uv-callout-') {
               emittedClasses.add(m);
@@ -76,7 +76,7 @@ describe("Theme token spec", () => {
         }
       } else if (stat.isDirectory()) {
         const files = fs.readdirSync(dir);
-        files.forEach(f => scanDir(path.join(dir, f)));
+        files.forEach((f: string) => scanDir(path.join(dir, f)));
       }
     };
 
