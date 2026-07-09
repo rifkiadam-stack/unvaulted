@@ -19,7 +19,12 @@ export function buildInlineDecorations(state: EditorState, node: SyntaxNodeRef, 
     decos.push(Decoration.mark({ class: cls }).range(node.from, node.to));
 
     if (!revealed) {
-      const targetMark = name === "InlineCode" ? "CodeMark" : name + "Mark";
+      let targetMark = "";
+      if (name === "StrongEmphasis") targetMark = "EmphasisMark";
+      else if (name === "Emphasis") targetMark = "EmphasisMark";
+      else if (name === "Strikethrough") targetMark = "StrikethroughMark";
+      else if (name === "Highlight") targetMark = "HighlightMark";
+      else if (name === "InlineCode") targetMark = "CodeMark";
       
       const nodeObj = node.node;
       let child = nodeObj.firstChild;
