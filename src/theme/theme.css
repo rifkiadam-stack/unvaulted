@@ -100,13 +100,13 @@ body {
   font-size: 0.9em;
 }
 
-/* Headings with explicit line height (Amendment #2) */
-.uv-h1 { font-size: 1.6em; font-weight: bold; line-height: 1.6; display: inline-block; margin: 0; }
-.uv-h2 { font-size: 1.4em; font-weight: bold; line-height: 1.6; display: inline-block; margin: 0; }
-.uv-h3 { font-size: 1.25em; font-weight: bold; line-height: 1.6; display: inline-block; margin: 0; }
-.uv-h4 { font-size: 1.1em; font-weight: bold; line-height: 1.6; display: inline-block; margin: 0; }
-.uv-h5 { font-size: 1.0em; font-weight: bold; line-height: 1.6; display: inline-block; margin: 0; }
-.uv-h6 { font-size: 0.9em; font-weight: bold; color: var(--uv-text-muted); line-height: 1.6; display: inline-block; margin: 0; }
+/* Headings on line-level (Correction round 1) */
+.cm-line.uv-h1 { font-size: 1.6em; font-weight: bold; }
+.cm-line.uv-h2 { font-size: 1.4em; font-weight: bold; }
+.cm-line.uv-h3 { font-size: 1.25em; font-weight: bold; }
+.cm-line.uv-h4 { font-size: 1.1em; font-weight: bold; }
+.cm-line.uv-h5 { font-size: 1.0em; font-weight: bold; }
+.cm-line.uv-h6 { font-size: 0.9em; font-weight: bold; color: var(--uv-text-muted); }
 
 /* Links */
 .uv-link, .uv-wikilink, .uv-embed {
@@ -145,7 +145,6 @@ body {
   border-left: 3px solid var(--uv-border);
   padding-left: 1em;
   color: var(--uv-text-muted);
-  display: inline-block;
 }
 
 /* HR */

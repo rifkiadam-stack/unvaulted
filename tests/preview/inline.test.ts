@@ -64,7 +64,7 @@ describe("Inline decorations", () => {
     const styling = decos.filter(d => d.spec.class === "uv-h2");
     expect(styling.length).toBe(1);
     expect(styling[0].from).toBe(0);
-    expect(styling[0].to).toBe(8);
+    expect(styling[0].to).toBe(0); // Line decoration spans 0 characters
     
     const replacements = decos.filter(d => !d.spec.class);
     expect(replacements.length).toBe(1);

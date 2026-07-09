@@ -39,7 +39,7 @@ export function buildInlineDecorations(state: EditorState, node: SyntaxNodeRef, 
     const revealed = isRevealed(state, node.from, node.to, true); // Headings are block constructs
     
     const level = name.charAt(10);
-    decos.push(Decoration.mark({ class: `uv-h${level}` }).range(node.from, node.to));
+    decos.push(Decoration.line({ class: `uv-h${level}` }).range(node.from));
 
     if (!revealed) {
       const nodeObj = node.node;
