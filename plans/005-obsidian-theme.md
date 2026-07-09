@@ -262,3 +262,62 @@ because they are layout/chrome, which this plan owns — do NOT fix them in 004)
    directly on several lines (including heading lines) and confirming the caret
    lands where clicked. If it persists after line-height is normalized, report
    the DOM/measurement details — do not paper over it with offsets.
+
+## Correction round 1 — 2026-07-09 — click-accuracy still off (root cause found)
+
+Theme applied and looks right; `**bold**` hotfix confirmed. Remaining issue:
+clicking to place the caret lands ~one line high on many lines (cumulative
+drift). Reviewer read `theme.css` — root cause is concrete:
+
+**The heading rules use `display: inline-block` on inline decoration spans.**
+`.uv-h1..h6` (theme.css) set `font-size: 1.6em … 0.9em` AND `display:
+inline-block` AND `line-height: 1.6`. These are `Decoration.mark` (inline) spans
+inside `.cm-line`. `display: inline-block` creates a new formatting context that
+changes the line-box height CodeMirror measures, so `posAtCoords` (click→pos)
+mis-maps; the taller heading lines then shift everything below them, which is why
+many lines — not just headings — are off. The unitless `line-height: 1.6` on a
+1.6em span compounds it (effective 1.6×1.6em ≠ the `.cm-line` line box).
+
+**Fix — Step A (CSS only, this plan's scope; try first):**
+- Remove `display: inline-block` and `margin: 0` from every `.uv-h1..h6` rule —
+  keep only `font-size`, `font-weight`, and (for h6) color. Let them render as
+  normal inline marks so the line grows naturally and CM measures it.
+- Remove `display: inline-block` from `.uv-blockquote` too (same hazard).
+- Keep `.cm-line { line-height: 1.6 }`. Do NOT put a unitless `line-height` on
+  the heading spans; if a heading needs vertical breathing room, use the line,
+  not the inline span.
+- Verify: click directly on normal lines, heading lines, and lines just below a
+  block widget (Properties/callout/table) — caret must land exactly where
+  clicked. Report the result.
+
+**Fix — Step B (only if Step A doesn't fully fix heading-line clicks;
+authorized `003-hotfix:` on this branch — one `src/preview/widgets/inline.ts`
+change, mirrors the bold hotfix precedent):**
+- Convert the heading styling from an inline `Decoration.mark` to a
+  `Decoration.line` that adds the `uv-h{level}` class to the whole `.cm-line`
+  (keep the separate `HeaderMark`-hiding replace decoration as-is). Move the
+  heading `font-size` CSS onto `.cm-line.uv-h1 … .cm-line.uv-h6`. A line
+  decoration grows the entire line box uniformly, which is how CodeMirror
+  measures heights correctly — the robust Obsidian-like approach. Add/adjust the
+  inline heading test if the decoration kind changes (it will now be a line deco,
+  not a mark on the node span).
+
+Gates unchanged (`npm run typecheck && npm test && npm run build`). If Step B is
+used, note the extra `inline.ts` diff in the plan-005 report (as with the bold
+`003-hotfix`). Do NOT introduce click-coordinate offsets or transforms as a
+workaround — fix the measurement.
+
+## Correction round 2 — 2026-07-09 — remove redundant `// @ts-nocheck`
+
+Reviewer spotted in commit `806648f`: `tests/theme/tokens.test.ts` starts with
+`// @ts-nocheck`, which disables ALL type checking for that file (hiding any
+future type errors, not just the original one). The same commit already added
+the correct fix — `@types/node` as a devDependency — which types the `fs`/`path`
+imports that were the actual problem. So the `// @ts-nocheck` is now redundant
+and only removes safety.
+
+**Fix (one commit `005: remove redundant @ts-nocheck from tokens test`):**
+delete the `// @ts-nocheck` line from `tests/theme/tokens.test.ts` and confirm
+`npm run typecheck` still passes (it should, now that `@types/node` is present).
+If a real type error surfaces after removal, fix it properly (type the value) —
+do not re-add the blanket suppression.
