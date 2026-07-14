@@ -78,6 +78,7 @@ body {
   color: var(--uv-text);
 }
 .cm-content {
+  font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
   max-width: 44rem;
   margin: 0 auto;
   padding-top: 1rem;
