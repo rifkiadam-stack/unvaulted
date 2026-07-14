@@ -18,7 +18,7 @@ live preview, manual save, near-zero chrome.
 | 002 | Markdown dialect parsing layer (GFM + Obsidian nodes) | P1 | M | 001 | DONE (PASS — incl. frontmatter-termination hotfix, delivered on 003 branch) |
 | 003 | Live-preview decoration engine | P1 | L | 002 | DONE (PASS — after 5 correction rounds + review fix, see plan Review) |
 | 004 | File session (open/save/dirty) + Tauri app shell | P1 | M | 001 | DONE (PASS — after 2 smoke-correction rounds + review fix) |
-| 005 | Obsidian default theme (dark+light, follows OS) | P2 | M | 003 | DONE (PASS — after click-accuracy layout fix & hotfix) |
+| 005 | Obsidian default theme (dark+light, follows OS) | P2 | M | 003 | DONE (PASS — reviewer-confirmed 2026-07-14: side-by-side accepted, click-accuracy + font fixes, 2× 003-hotfix rides) |
 | 006 | NSIS installer + `.md` file association | P2 | S | 001–005 (all) | TODO |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (one-line reason) | REJECTED
@@ -51,6 +51,13 @@ Status values: TODO | IN PROGRESS | DONE | BLOCKED (one-line reason) | REJECTED
 - Greenfield repo → no audit findings; this series comes from the PRD, not from
   defects. Product-level rejections recorded there (autosave, tabs, settings UI,
   math/mermaid/footnotes, macOS/Linux — all explicitly out of MVP scope).
+
+## Post-MVP backlog (queued after 006, in this order)
+
+| Candidate | Feature | Origin |
+|-----------|---------|--------|
+| 007 | **Clipboard image paste** — paste an image → save PNG next to the open `.md` (`Pasted image YYYYMMDD-HHMMSS.png`), insert standard `![](...)` (renders via 003's image widget + basePath); untitled buffer → prompt to save first; needs a Tauri binary-write command + capability | Operator request during 005 side-by-side review (2026-07-14) |
+| 008 | **Interactive Properties editor** — Obsidian-like add-property UI, limited key set (`trigger, tags, created, updated, type, title, sources`), Obsidian date formats; supersedes the read-only Properties card | Operator request during 003 smoke (2026-07-07); see plan 003 "Routing" section |
 
 ## Review protocol (orchestrator)
 

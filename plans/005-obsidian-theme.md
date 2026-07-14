@@ -321,3 +321,69 @@ delete the `// @ts-nocheck` line from `tests/theme/tokens.test.ts` and confirm
 `npm run typecheck` still passes (it should, now that `@types/node` is present).
 If a real type error surfaces after removal, fix it properly (type the value) —
 do not re-add the blanket suppression.
+
+## Correction round 3 — 2026-07-14 — body font is monospace (spec deviation)
+
+Side-by-side review (operator-accepted otherwise: colors, callouts, tags,
+headings, properties, dark/light OS-follow, and click accuracy all confirmed
+good) surfaced one deviation from this plan's typography spec: the editor text
+renders in a **monospace** font, while the spec (and Obsidian) use a
+proportional stack (`-apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+sans-serif` at 16px). Root cause: `theme.css` sets the stack on `body`, but
+CodeMirror's own `.cm-content` default (monospace) overrides it —
+`.cm-line { font-family: inherit }` inherits from `.cm-content`, not `body`.
+Operator decision: **match Obsidian** (proportional).
+
+**Fix (one commit `005: proportional body font in editor`):** set the
+proportional stack explicitly on `.cm-content` (CSS in `theme.css`, or the
+`editorTheme.ts` `".cm-content"` block — one place, not both). Monospace stays
+ONLY where the spec says: `uv-code-inline`, fenced code, and revealed raw
+syntax. Verify visually (body text proportional, code still mono) and confirm
+click accuracy is unaffected (font metrics change line heights — re-do the
+quick click test on normal + heading lines). Gates green.
+
+## Review — 2026-07-14
+
+**Verdict: PASS.**
+
+Reviewed range `main..feat/005-theme` (8 commits: theme implementation, three
+authorized `003-hotfix` rides, `@ts-nocheck` cleanup, font correction). Gates
+re-run independently: typecheck PASS, **71/71 tests PASS**, build PASS.
+
+**Operator acceptance (the plan's Step-5 bar):** side-by-side against real
+Obsidian accepted — colors, callouts, tag pills, heading scale, Properties card,
+dark/light OS-follow all confirmed "familiar immediately". Click accuracy
+explicitly confirmed after the `Decoration.line` fix. Proportional body font
+confirmed after correction round 3.
+
+**Verified in detail:**
+- Token sheet + light `@media` overrides present; `tokens.test.ts` enforces
+  every emitted `uv-*` class is styled (checks 1–3 per the test plan, now
+  properly typed via `@types/node` + `tsconfig "types": ["node"]` — the
+  `// @ts-nocheck` shortcut was removed as required).
+- Authorized hotfix rides, all in scope: bold/strike/highlight delimiter map fix
+  (`442877a`), heading `Decoration.line` click-accuracy fix (`a28ecdf`), with
+  regression tests extended in `inline.test.ts`.
+- Font lives in ONE place (`theme.css .cm-content`); `editorTheme.ts` handles
+  chrome only. Monospace retained for code/revealed-syntax only.
+
+**Accepted with note — `src-tauri/Cargo.toml` `features = []` churn is now
+committed.** Prior reviews kept discarding this Tauri-CLI normalization on every
+`tauri dev` run; committing it once actually stops the recurring working-tree
+noise, so the reviewer accepts it here and reverses the earlier "don't commit"
+instruction. Zero functional effect.
+
+**Process notes (recurring, for future plans):**
+- `5bcb874 "005: mark plan 005 as DONE"` — executor self-marked the README
+  status again; the verdict is the reviewer's call. Same note as plan 002.
+- Duplicate commit pair `415f8f2`/`073f40a` (identical message; the first
+  removed `@ts-nocheck`, the second is empty-ish follow-up) — harmless, but
+  executors should avoid re-running a commit step.
+- `806648f` bundled an unrelated plan-003 doc edit + Cargo.toml churn into the
+  "ignore typecheck" commit — commits should stay single-purpose.
+
+**MVP visual thesis is now delivered**: "conceptually Notepad, the writing
+surface is Obsidian" — confirmed by the operator against the real thing.
+**Ready to merge `feat/005-theme` → `main`.** Remaining: plan 006 (NSIS
+installer + `.md` association) to complete the MVP; then backlog 007 (image
+paste) and 008 (interactive Properties) per `plans/README.md`.
