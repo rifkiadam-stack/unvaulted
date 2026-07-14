@@ -114,6 +114,14 @@ Icons: keeping the default Tauri icons is acceptable for MVP. If you replace
 them, generate via `npx tauri icon <source.png>` from a single 1024×1024 source
 and commit the generated `src-tauri/icons/`; do not hand-edit individual sizes.
 
+> **Amendment 2026-07-14 — operator supplied a real logo; use it.** The
+> operator added `src/logo/Unvaulted Logo.png` (2048×2048 RGBA — valid source).
+> In Step 1, run `npx tauri icon "src/logo/Unvaulted Logo.png"` and commit BOTH
+> the source PNG and the regenerated `src-tauri/icons/` (this adds `src/logo/**`
+> to this plan's in-scope list). The quoted path matters — it contains a space.
+> After building, verify the installer/EXE and the window/taskbar show the new
+> icon (add this to the Step 3 checklist as item 11).
+
 **Verify**: `npm run tauri build` → exit 0; `.exe` installer exists under
 `src-tauri/target/release/bundle/nsis/`.
 
