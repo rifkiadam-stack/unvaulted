@@ -9,6 +9,7 @@ export const editorTheme = EditorView.theme({
   },
   ".cm-content": {
     caretColor: "var(--uv-text)",
+    flexGrow: 0
   },
   "&.cm-focused .cm-cursor": {
     borderLeftColor: "var(--uv-text)"
