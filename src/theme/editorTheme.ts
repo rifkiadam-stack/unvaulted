@@ -18,7 +18,9 @@ export const editorTheme = EditorView.theme({
   },
   ".cm-gutters": {
     display: "none"
-  }
+  },
+  ".cm-activeLine": { backgroundColor: "transparent" },
+  ".cm-activeLineGutter": { backgroundColor: "transparent" }
 });
 
 export const markdownHighlightStyle = syntaxHighlighting(HighlightStyle.define([
