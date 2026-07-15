@@ -23,7 +23,8 @@ export const editorTheme = EditorView.theme({
     justifyContent: "center"
   },
   ".cm-activeLine": { backgroundColor: "transparent" },
-  ".cm-activeLineGutter": { backgroundColor: "transparent" }
+  ".cm-activeLineGutter": { backgroundColor: "transparent" },
+  ".cm-line": { lineHeight: "1.6" }
 });
 
 export const markdownHighlightStyle = syntaxHighlighting(HighlightStyle.define([

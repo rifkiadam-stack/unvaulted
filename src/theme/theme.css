@@ -214,10 +214,11 @@ body {
 /* Properties Block */
 .uv-properties {
   background-color: var(--uv-bg-secondary);
-  border: 1px solid var(--uv-border);
+  border-bottom: 1em solid transparent;
+  background-clip: padding-box;
+  box-shadow: inset 0 0 0 1px var(--uv-border);
   border-radius: 6px;
   padding: 1em;
-  margin-bottom: 1em;
   font-size: 0.875em;
 }
 .uv-properties-header {
@@ -254,11 +255,14 @@ body {
 
 /* Callouts */
 .uv-callout {
+  border-top: 1em solid transparent;
+  border-bottom: 1em solid transparent;
   border-left: 4px solid var(--uv-callout-note);
+  border-right: none;
+  background-clip: padding-box;
   background-color: color-mix(in srgb, var(--uv-callout-note) 10%, transparent);
   padding: 1em;
   border-radius: 0 4px 4px 0;
-  margin: 1em 0;
 }
 .uv-callout-title {
   font-weight: bold;
