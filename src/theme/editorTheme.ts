@@ -9,7 +9,9 @@ export const editorTheme = EditorView.theme({
   },
   ".cm-content": {
     caretColor: "var(--uv-text)",
-    flexGrow: 0
+    flexGrow: 0,
+    fontFamily: '-apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif',
+    fontSize: "16px"
   },
   "&.cm-focused .cm-cursor": {
     borderLeftColor: "var(--uv-text)"

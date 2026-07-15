@@ -40,9 +40,6 @@
 body {
   background-color: var(--uv-bg);
   color: var(--uv-text);
-  font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
-  font-size: 16px;
-  line-height: 1.6;
   margin: 0;
   padding: 0;
 }
@@ -105,7 +102,6 @@ body {
   color: var(--uv-text);
 }
 .cm-content {
-  font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
   width: min(48rem, 100%);
   margin: 0 auto;
   padding-top: 1rem;
