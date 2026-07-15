@@ -16,8 +16,13 @@ import {
   SessionState
 } from "./session/fileSession";
 
+import { initialMode, nextMode, ThemeMode } from "./theme/themeMode";
+
 let session = emptySession();
 const platform = tauriPlatform();
+
+const currentTheme = initialMode(localStorage.getItem('uv-theme'));
+document.documentElement.dataset.theme = currentTheme;
 
 const appDiv = document.querySelector('#app') as HTMLElement;
 appDiv.innerHTML = '';
@@ -25,6 +30,29 @@ appDiv.style.position = 'relative';
 appDiv.style.display = 'flex';
 appDiv.style.flexDirection = 'column';
 appDiv.style.height = '100vh';
+
+const headerRow = document.createElement('div');
+headerRow.className = 'uv-app-header';
+
+const logo = document.createElement('img');
+logo.className = 'uv-app-logo';
+logo.src = '/logo-128.png';
+headerRow.appendChild(logo);
+
+const themeToggle = document.createElement('button');
+themeToggle.className = 'uv-theme-toggle';
+themeToggle.ariaLabel = 'Toggle theme';
+themeToggle.textContent = currentTheme === 'dark' ? '☀' : '🌙';
+themeToggle.onclick = () => {
+  const current = (document.documentElement.dataset.theme as ThemeMode) || 'dark';
+  const next = nextMode(current);
+  document.documentElement.dataset.theme = next;
+  localStorage.setItem('uv-theme', next);
+  themeToggle.textContent = next === 'dark' ? '☀' : '🌙';
+};
+headerRow.appendChild(themeToggle);
+
+appDiv.appendChild(headerRow);
 
 const titleDiv = document.createElement('div');
 titleDiv.className = 'uv-inline-title';

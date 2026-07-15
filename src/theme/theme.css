@@ -47,6 +47,35 @@ body {
   padding: 0;
 }
 
+/* App Header */
+.uv-app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 40px;
+  padding: 0 0.75rem;
+  background-color: var(--uv-bg);
+  border-bottom: 1px solid var(--uv-border);
+}
+
+.uv-app-logo {
+  height: 22px;
+  width: auto;
+}
+
+.uv-theme-toggle {
+  background: transparent;
+  border: none;
+  color: var(--uv-text-muted);
+  font-size: 1.2em;
+  cursor: pointer;
+  padding: 0.2em;
+}
+
+.uv-theme-toggle:hover {
+  color: var(--uv-text);
+}
+
 /* App Empty State */
 .uv-empty-hint {
   position: absolute;
