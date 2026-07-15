@@ -90,7 +90,7 @@ body {
 
 /* Inline Title */
 .uv-inline-title {
-  max-width: 44rem;
+  width: min(48rem, 100%);
   margin: 0 auto;
   padding: 2rem 0 1rem 0;
   font-size: 2.2em;
@@ -106,7 +106,7 @@ body {
 }
 .cm-content {
   font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
-  max-width: 44rem;
+  width: min(48rem, 100%);
   margin: 0 auto;
   padding-top: 1rem;
 }

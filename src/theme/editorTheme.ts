@@ -19,6 +19,9 @@ export const editorTheme = EditorView.theme({
   ".cm-gutters": {
     display: "none"
   },
+  ".cm-scroller": {
+    justifyContent: "center"
+  },
   ".cm-activeLine": { backgroundColor: "transparent" },
   ".cm-activeLineGutter": { backgroundColor: "transparent" }
 });
