@@ -42,9 +42,7 @@ describe("Theme token spec", () => {
     }
 
     // Light block overrides
-    const lightBlockMatch = cssContent.match(/@media\s*\(\s*prefers-color-scheme:\s*light\s*\)\s*\{([^}]*)\}/s);
-    // Actually the media block contains :root {}, so we need to match broadly
-    const lightBlock = cssContent.slice(cssContent.indexOf("prefers-color-scheme: light"));
+    const lightBlock = cssContent.slice(cssContent.indexOf('[data-theme="light"]'));
     expect(lightBlock).toContain("--uv-bg");
     expect(lightBlock).toContain("--uv-text");
     expect(lightBlock).toContain("--uv-link");

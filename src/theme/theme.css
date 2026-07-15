@@ -22,21 +22,19 @@
   --uv-callout-quote:    #9e9e9e;
 }
 
-@media (prefers-color-scheme: light) { 
-  :root {
-    --uv-bg:            #ffffff;
-    --uv-bg-secondary:  #f6f6f6;
-    --uv-text:          #222222;
-    --uv-text-muted:    #808080;
-    --uv-text-faint:    #aaaaaa;
-    --uv-accent:        #7b52ee;
-    --uv-link:          #7b52ee;
-    --uv-highlight-bg:  rgba(255, 208, 0, 0.4);
-    --uv-code-bg:       #f0f0f0;
-    --uv-border:        #e0e0e0;
-    --uv-selection:     rgba(123, 82, 238, 0.20);
-    --uv-hr:            #e0e0e0;
-  }
+:root[data-theme="light"] {
+  --uv-bg:            #ffffff;
+  --uv-bg-secondary:  #f6f6f6;
+  --uv-text:          #222222;
+  --uv-text-muted:    #808080;
+  --uv-text-faint:    #aaaaaa;
+  --uv-accent:        #7b52ee;
+  --uv-link:          #7b52ee;
+  --uv-highlight-bg:  rgba(255, 208, 0, 0.4);
+  --uv-code-bg:       #f0f0f0;
+  --uv-border:        #e0e0e0;
+  --uv-selection:     rgba(123, 82, 238, 0.20);
+  --uv-hr:            #e0e0e0;
 }
 
 body {
