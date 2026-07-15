@@ -47,17 +47,12 @@ body {
 /* App Header */
 .uv-app-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   height: 40px;
   padding: 0 0.75rem;
   background-color: var(--uv-bg);
   border-bottom: 1px solid var(--uv-border);
-}
-
-.uv-app-logo {
-  height: 22px;
-  width: auto;
 }
 
 .uv-theme-toggle {

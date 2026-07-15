@@ -34,11 +34,6 @@ appDiv.style.height = '100vh';
 const headerRow = document.createElement('div');
 headerRow.className = 'uv-app-header';
 
-const logo = document.createElement('img');
-logo.className = 'uv-app-logo';
-logo.src = '/logo-128.png';
-headerRow.appendChild(logo);
-
 const themeToggle = document.createElement('button');
 themeToggle.className = 'uv-theme-toggle';
 themeToggle.ariaLabel = 'Toggle theme';
