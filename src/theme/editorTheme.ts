@@ -16,7 +16,10 @@ export const editorTheme = EditorView.theme({
   "&.cm-focused .cm-cursor": {
     borderLeftColor: "var(--uv-text)"
   },
-  "&.cm-focused .cm-selectionBackground, ::selection": {
+  ".cm-selectionBackground": {
+    backgroundColor: "var(--uv-selection)"
+  },
+  "&.cm-focused .cm-selectionBackground": {
     backgroundColor: "var(--uv-selection)"
   },
   ".cm-gutters": {
