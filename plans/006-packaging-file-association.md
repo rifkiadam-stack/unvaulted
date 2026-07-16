@@ -209,3 +209,58 @@ Stop and report back (do not improvise) if:
   config; the CLI-path open contract (plan 004) is already cross-platform.
 - Reviewer should scrutinize: the checklist's items 5 and 9 (association
   etiquette) — they are the difference between a polite app and a rude one.
+
+## Correction round 1 — 2026-07-16 — install-test findings (registry-diagnosed)
+
+Operator installed and tested. Titlebar shows the new logo (exe embed correct)
+and the app runs, but: "Open with → Unvaulted" opens the app WITHOUT loading
+the file (checklist item 4 FAIL); taskbar + Open-With menu icons show the OLD
+logo; the app installed to `C:\Program Files (x86)\Unvaulted\` (not per-user).
+Reviewer inspected the registry directly; root causes are concrete:
+
+**R1 — the binary is named `app.exe` (generic name collision).** The ProgId
+command is correctly registered (`C:\Program Files (x86)\Unvaulted\app.exe "%1"`),
+but Explorer's per-extension MRU (`FileExts\.md\OpenWithList`) stores the bare
+name `app.exe` — which Windows can resolve to a DIFFERENT app.exe (e.g. the old
+dev/release build under the repo's `target\` — explains the old icon on the
+taskbar and in the Open-With menu, and launching a stale build). Fix: give the
+binary a unique name — add top-level `"mainBinaryName": "Unvaulted"` to
+`src-tauri/tauri.conf.json` (Tauri v2 key). The installed exe becomes
+`Unvaulted.exe`; the bundler updates the ProgId command automatically.
+
+**R2 — file never loads from association/CLI while Ctrl+O works (fs scope).**
+The dialog plugin auto-extends the fs scope for files the user picks — that is
+why Ctrl+O reads fine. An association/CLI path gets NO such runtime grant and
+`readTextFile` (plugin-fs) is refused by the static scope, silently caught by
+`loadPath`'s catch → empty state. Fix consistent with how writes already work
+(`save_atomic` is a custom command bypassing plugin scope): add a Rust command
+`read_file(path: String) -> Result<String, String>` using
+`std::fs::read_to_string`, register it, and switch `platform.readFile` to
+`invoke('read_file', { path })`. Also make `get_open_path`'s extension check
+case-insensitive (`.MD` files are legal). Add/adjust the fileSession-level test
+only if any pure logic changed (likely none — this is shell wiring).
+
+**R3 — uncommitted state AGAIN.** The bundle config (`targets: ["nsis"]`,
+`fileAssociations`, `installMode: currentUser`, publisher metadata) and
+`plans/006-verification-checklist.md` exist only in the working tree. The
+installer was built from uncommitted config — a clean clone cannot reproduce
+this build. Commit them (config change + checklist skeleton), plus the R1/R2
+changes, each as its own commit prefixed `006:`. This is the third occurrence
+of ship-from-uncommitted-state (004 deps, 007 protocol-asset) — run
+`git status` before EVERY completion report and include its output.
+
+**R4 — install landed in `Program Files (x86)` despite
+`installMode: currentUser`.** Possibly the operator changed the directory in
+the installer UI, or elevation kicked in. After R1–R3, rebuild and re-test;
+checklist item 1 (per-user, no UAC) decides. If the fresh installer still
+defaults to Program Files (x86), report the installer's shown default directory
+— do not guess at NSIS internals.
+
+**Re-test sequence (operator, after the rebuild):**
+1. Uninstall the current "Unvaulted" (Settings → Apps) — removes the
+   Program Files (x86) install.
+2. Refresh the icon cache: run `ie4uinit.exe -show` (or sign out/in) — clears
+   the stale old-logo entries.
+3. Install the NEW setup exe; re-run the full checklist 1–11. Item 4 must now
+   load the file; taskbar/Open-With icons must show the new logo (the
+   `Unvaulted.exe` name registers fresh, bypassing the stale `app.exe` MRU).
