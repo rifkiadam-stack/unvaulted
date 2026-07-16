@@ -422,3 +422,18 @@ header (stale — later rounds removed it); code is correct.
 
 On the fix landing + operator's final smoke (dark default after toggling back,
 logo icon after stale-exe delete, local images render), this plan is DONE.
+
+### Re-review — 2026-07-16 — verdict PASS
+
+Fix landed in `c8aa1d6`: pure `resolveImageSrc(url, basePath)` extracted and
+used by `toDOM`; tests call the resolver directly (remote passthrough, Windows
+join, `%20` decode) — **79/79 tests, typecheck, build all green, verified
+independently**. Operator confirms everything else works ("yang lainnya udah
+oke banget"). **Plan 007 complete — merging to `main`.**
+
+Remaining operator observation — notes whose images are Obsidian
+`![[image.png]]` embeds still show as inert text: **working as designed** (the
+PRD's no-vault decision), now formally queued for reversal *for image embeds
+only* in backlog plan 008 (see `plans/README.md`), including bounded upward
+path resolution since Obsidian saves pasted attachments at the vault root, not
+next to the note.
