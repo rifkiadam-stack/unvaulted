@@ -1,15 +1,16 @@
-import { EditorState } from "@codemirror/state";
+import { EditorState, Extension } from "@codemirror/state";
 import { unvaultedMarkdown } from "../../src/markdown/lang";
 import { livePreviewField } from "../../src/preview/livePreview";
 import { ensureSyntaxTree } from "@codemirror/language";
 
-export function createPreviewState(doc: string, selection?: {anchor: number, head?: number}) {
+export function createPreviewState(doc: string, selection?: {anchor: number, head?: number}, extraExtensions: Extension[] = []) {
   let state = EditorState.create({
     doc,
     selection,
     extensions: [
       unvaultedMarkdown(),
-      livePreviewField
+      livePreviewField,
+      ...extraExtensions
     ]
   });
   

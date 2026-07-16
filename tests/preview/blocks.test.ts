@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { createPreviewState, decorationsOf } from "./harness";
 import { taskToggleChange } from "../../src/preview/widgets/task";
+import { uvBasePath } from "../../src/preview/widgets/image";
 
 describe("Block basics", () => {
   it("renders HR widget when cursor is away", () => {
@@ -60,15 +61,20 @@ describe("Block basics", () => {
     expect(newState.doc.toString()).toBe("- [ ] task");
   });
 
-  it("renders block image widget for image on its own line", () => {
-    const state = createPreviewState("![alt](img.png)\nout", { anchor: 18 });
+  it("renders block image widget for image on its own line with basePath resolution", () => {
+    const state = createPreviewState("![alt](pic.png)\nout", { anchor: 18 }, [uvBasePath.of("C:\\notes")]);
     const decos = decorationsOf(state);
     
     const widgets = decos.filter(d => d.spec.widget !== undefined && d.spec.widget.constructor.name === "ImageWidget");
     expect(widgets.length).toBe(1);
-    expect((widgets[0].spec.widget as any).url).toBe("img.png");
+    const widget = widgets[0].spec.widget as any;
+    expect(widget.url).toBe("pic.png");
     // Assert block: true
     expect(widgets[0].spec.block).toBe(true);
+    
+    // Test DOM generation handles the fallback joining correctly
+    const dom = widget.toDOM();
+    expect(dom.getAttribute("src")).toBe("C:\\notes\\pic.png");
   });
 
   it("reveals block image when cursor touches line", () => {

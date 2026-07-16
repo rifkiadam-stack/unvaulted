@@ -13,8 +13,12 @@ import {
   afterSave,
   onCloseRequested,
   inlineTitle,
-  SessionState
+  SessionState,
+  dirOf
 } from "./session/fileSession";
+
+import { Compartment } from "@codemirror/state";
+import { uvBasePath } from "./preview/widgets/image";
 
 import { initialMode, nextMode, ThemeMode } from "./theme/themeMode";
 
@@ -97,13 +101,16 @@ async function doOpen() {
   }
 }
 
+const baseCompartment = new Compartment();
+
 async function loadPath(path: string) {
   try {
     const text = await platform.readFile(path);
     const newState = loadFile(path, text);
     
     view.dispatch({
-      changes: { from: 0, to: view.state.doc.length, insert: newState.currentText }
+      changes: { from: 0, to: view.state.doc.length, insert: newState.currentText },
+      effects: baseCompartment.reconfigure(uvBasePath.of(dirOf(path)))
     });
     
     await updateState(newState);
@@ -181,7 +188,10 @@ const updateListener = EditorView.updateListener.of((update) => {
   }
 });
 
-view = createEditor(editorContainer, '', [updateListener]);
+view = createEditor(editorContainer, '', [
+  updateListener,
+  baseCompartment.of(uvBasePath.of(''))
+]);
 
 platform.onCloseRequested(attemptClose);
 platform.onFileDrop(loadPath);

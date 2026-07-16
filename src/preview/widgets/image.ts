@@ -3,6 +3,8 @@ import { Decoration, WidgetType } from "@codemirror/view";
 import { SyntaxNodeRef } from "@lezer/common";
 import { isRevealed } from "../reveal";
 
+import { convertFileSrc } from "@tauri-apps/api/core";
+
 export const uvBasePath = Facet.define<string, string>({
   combine: values => values.length ? values[0] : (typeof document !== "undefined" ? document.baseURI : "")
 });
@@ -17,10 +19,27 @@ class ImageWidget extends WidgetType {
   toDOM() {
     const img = document.createElement("img");
     img.className = "uv-image";
+    const rawUrl = this.url;
+    
+    if (rawUrl.startsWith("http://") || rawUrl.startsWith("https://") || rawUrl.startsWith("data:")) {
+      img.src = rawUrl;
+      return img;
+    }
+    
+    let joined = rawUrl;
+    if (this.basePath) {
+      const sep = this.basePath.includes('\\') ? '\\' : '/';
+      const cleanBase = this.basePath.replace(/[\\/]+$/, "");
+      const cleanUrl = decodeURIComponent(rawUrl).replace(/^[\\/]+/, "");
+      joined = `${cleanBase}${sep}${cleanUrl}`;
+    } else {
+      joined = decodeURIComponent(rawUrl);
+    }
+    
     try {
-      img.src = new URL(this.url, this.basePath).href;
+      img.src = convertFileSrc(joined);
     } catch (e) {
-      img.src = this.url;
+      img.src = joined;
     }
     return img;
   }

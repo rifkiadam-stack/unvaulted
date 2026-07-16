@@ -334,3 +334,52 @@ Steps: (1) stop `tauri dev`; (2) delete `src-tauri\target\debug\app.exe`;
 it actually shows the operator's logo — if it doesn't, `npx tauri icon` output
 is wrong: report. The release build (plan 006) embeds it definitively; final
 confirmation lands there.
+
+## Correction round 3 — 2026-07-16 — F4: local images don't render (executor)
+
+F2 (tree-progress rebuild) landed and verified. Operator reports images still
+don't show. Reviewer read the code — **two stacked gaps**, both real:
+
+1. `src/preview/widgets/image.ts` defines the `uvBasePath` facet, but
+   `src/main.ts` **never provides it** — the default stays `document.baseURI`
+   (the dev-server/app origin), so `![](picture.png)` next to the opened `.md`
+   resolves to a nonexistent app URL.
+2. Even with a correct local path, a Tauri v2 webview cannot load `file://`
+   URLs. Local files must go through the **asset protocol**:
+   `convertFileSrc(absolutePath)` from `@tauri-apps/api/core`, with
+   `tauri.conf.json > app > security > assetProtocol: { "enable": true,
+   "scope": ["**"] }` (broad scope is intentional — Unvaulted opens arbitrary
+   user files, images sit next to them; mirrors the fs read scope decision in
+   plan 004).
+
+**Fix (executor, commits prefixed `007:`):**
+
+- **Wire the facet per file.** The facet value must change when a file loads →
+  put `uvBasePath` behind a `Compartment` (from `@codemirror/state`):
+  in `main.ts`, add the compartment instance to `createEditor`'s
+  `extraExtensions` (initial value: empty/baseURI), and in `loadPath(path)`
+  dispatch `effects: baseCompartment.reconfigure(uvBasePath.of(dirOf(path)))`
+  where `dirOf` = the path up to the last `/` or `\` (keep it in
+  `fileSession.ts` as a pure exported helper + unit test).
+- **Resolve + convert in the widget.** In `ImageWidget.toDOM`: if the URL is
+  already remote (`http://`, `https://`, `data:`), use it as-is. Otherwise
+  join `basePath` + relative URL (handle both slash directions; decode `%20`)
+  into an absolute local path and set `img.src = convertFileSrc(joined)`.
+  Import `convertFileSrc` from `@tauri-apps/api/core`. Guard for test
+  environments (no Tauri): fall back to the joined path if `convertFileSrc`
+  throws/unavailable, so headless tests still pass.
+- **Enable the asset protocol** in `src-tauri/tauri.conf.json` as above.
+- **Test:** unit-test `dirOf` (Windows + posix paths); extend the image widget
+  test: with `uvBasePath.of("C:\\notes")` and doc `![](pic.png)`, the widget's
+  URL joins to `C:\notes\pic.png` (assert the pre-convert join — the
+  convertFileSrc output is environment-specific).
+- **Operator verify:** open a real note whose folder contains the referenced
+  image (`![](name.png)` on its own line, cursor elsewhere) → the image
+  renders; remote `https://` images still render; `![[image embeds]]` remain
+  inert (by design — see note below).
+
+**Product note (not for this plan):** the operator's real notes mostly use
+Obsidian `![[image.png]]` embeds, which are inert **by design** (no vault).
+Same-folder image embeds COULD be resolved with this same machinery — that is
+a product decision for the operator, queued as a backlog question alongside
+008/009; do not implement it here.

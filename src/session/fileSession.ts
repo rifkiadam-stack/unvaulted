@@ -76,6 +76,13 @@ export function onCloseRequested(s: SessionState): CloseDecision {
   return isDirty(s) ? 'ask' : 'close';
 }
 
+export function dirOf(path: string): string {
+  if (!path) return '';
+  const lastSlash = Math.max(path.lastIndexOf('/'), path.lastIndexOf('\\'));
+  if (lastSlash === -1) return '';
+  return path.substring(0, lastSlash);
+}
+
 export function inlineTitle(s: SessionState): string | null {
   if (!s.path) return null;
   const basename = getBasename(s.path);

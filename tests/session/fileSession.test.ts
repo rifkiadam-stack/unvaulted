@@ -8,7 +8,8 @@ import {
   serializeForSave,
   afterSave,
   onCloseRequested,
-  inlineTitle
+  inlineTitle,
+  dirOf
 } from '../../src/session/fileSession';
 
 describe('fileSession pure module', () => {
@@ -77,5 +78,18 @@ describe('fileSession pure module', () => {
     expect(inlineTitle(loadFile('note.md', ''))).toBe('note');
     expect(inlineTitle(loadFile('C:\\path\\my-file.markdown', ''))).toBe('my-file');
     expect(inlineTitle(loadFile('/var/noext', ''))).toBe('noext');
+  });
+
+  describe("dirOf", () => {
+    it("extracts directory from windows path", () => {
+      expect(dirOf("C:\\Notes\\meeting.md")).toBe("C:\\Notes");
+    });
+    it("extracts directory from posix path", () => {
+      expect(dirOf("/home/user/notes/meeting.md")).toBe("/home/user/notes");
+    });
+    it("returns empty string if no slash", () => {
+      expect(dirOf("meeting.md")).toBe("");
+      expect(dirOf("")).toBe("");
+    });
   });
 });
