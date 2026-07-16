@@ -121,6 +121,19 @@ and commit the generated `src-tauri/icons/`; do not hand-edit individual sizes.
 > to this plan's in-scope list). The quoted path matters — it contains a space.
 > After building, verify the installer/EXE and the window/taskbar show the new
 > icon (add this to the Step 3 checklist as item 11).
+>
+> **Amendment update 2026-07-16 — logo REPLACED.** The operator superseded the
+> first logo with `src/logo/black logo.png` (2048×2048 RGBA, validated;
+> currently untracked). The icon set in `src-tauri/icons/` was generated from
+> the OLD logo during plan 007 — regenerate it here:
+> 1. `npx tauri icon "src/logo/black logo.png"` (quoted — path has a space).
+> 2. `git rm "src/logo/Unvaulted Logo.png"` (superseded; operator says it's
+>    no longer wanted) and commit the new source + regenerated
+>    `src-tauri/icons/**` together: `006: regenerate icons from final logo`.
+> 3. Delete the stale dev exe (`src-tauri\target\debug\app.exe`) so the next
+>    dev run embeds the new icon; the release build embeds it regardless.
+> 4. Step 3 checklist item 11 now verifies the NEW (black) logo appears as the
+>    installer icon, window/titlebar icon, and taskbar icon.
 
 **Verify**: `npm run tauri build` → exit 0; `.exe` installer exists under
 `src-tauri/target/release/bundle/nsis/`.
