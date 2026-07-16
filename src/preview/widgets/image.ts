@@ -9,6 +9,24 @@ export const uvBasePath = Facet.define<string, string>({
   combine: values => values.length ? values[0] : (typeof document !== "undefined" ? document.baseURI : "")
 });
 
+export function resolveImageSrc(url: string, basePath: string): string {
+  const rawUrl = url;
+  if (rawUrl.startsWith("http://") || rawUrl.startsWith("https://") || rawUrl.startsWith("data:")) {
+    return rawUrl;
+  }
+  
+  let joined = rawUrl;
+  if (basePath) {
+    const sep = basePath.includes('\\') ? '\\' : '/';
+    const cleanBase = basePath.replace(/[\\/]+$/, "");
+    const cleanUrl = decodeURIComponent(rawUrl).replace(/^[\\/]+/, "");
+    joined = `${cleanBase}${sep}${cleanUrl}`;
+  } else {
+    joined = decodeURIComponent(rawUrl);
+  }
+  return joined;
+}
+
 class ImageWidget extends WidgetType {
   constructor(readonly url: string, readonly basePath: string) {
     super();
@@ -19,27 +37,17 @@ class ImageWidget extends WidgetType {
   toDOM() {
     const img = document.createElement("img");
     img.className = "uv-image";
-    const rawUrl = this.url;
     
-    if (rawUrl.startsWith("http://") || rawUrl.startsWith("https://") || rawUrl.startsWith("data:")) {
-      img.src = rawUrl;
+    const resolved = resolveImageSrc(this.url, this.basePath);
+    if (resolved.startsWith("http://") || resolved.startsWith("https://") || resolved.startsWith("data:")) {
+      img.src = resolved;
       return img;
     }
     
-    let joined = rawUrl;
-    if (this.basePath) {
-      const sep = this.basePath.includes('\\') ? '\\' : '/';
-      const cleanBase = this.basePath.replace(/[\\/]+$/, "");
-      const cleanUrl = decodeURIComponent(rawUrl).replace(/^[\\/]+/, "");
-      joined = `${cleanBase}${sep}${cleanUrl}`;
-    } else {
-      joined = decodeURIComponent(rawUrl);
-    }
-    
     try {
-      img.src = convertFileSrc(joined);
+      img.src = convertFileSrc(resolved);
     } catch (e) {
-      img.src = joined;
+      img.src = resolved;
     }
     return img;
   }

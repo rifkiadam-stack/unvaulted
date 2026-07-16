@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { createPreviewState, decorationsOf } from "./harness";
 import { taskToggleChange } from "../../src/preview/widgets/task";
-import { uvBasePath } from "../../src/preview/widgets/image";
+import { uvBasePath, resolveImageSrc } from "../../src/preview/widgets/image";
 
 describe("Block basics", () => {
   it("renders HR widget when cursor is away", () => {
@@ -72,9 +72,11 @@ describe("Block basics", () => {
     // Assert block: true
     expect(widgets[0].spec.block).toBe(true);
     
-    // Test DOM generation handles the fallback joining correctly
-    const dom = widget.toDOM();
-    expect(dom.getAttribute("src")).toBe("C:\\notes\\pic.png");
+    // Test pure logic directly without hitting DOM/toDOM()
+    expect(resolveImageSrc("pic.png", "C:\\notes")).toBe("C:\\notes\\pic.png");
+    expect(resolveImageSrc("pic%20space.png", "C:\\notes")).toBe("C:\\notes\\pic space.png");
+    expect(resolveImageSrc("https://remote.com/img.png", "C:\\notes")).toBe("https://remote.com/img.png");
+    expect(resolveImageSrc("pic.png", "/home/user/notes")).toBe("/home/user/notes/pic.png");
   });
 
   it("reveals block image when cursor touches line", () => {
