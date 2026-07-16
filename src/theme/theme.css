@@ -166,11 +166,16 @@ body {
   color: var(--uv-text-muted);
 }
 
-/* HR */
+/* HR — spacing lives on the wrapper as PADDING (measured by CodeMirror);
+   margins on block-widget roots are invisible to CM's height measurement
+   and cause cumulative click drift. */
+.uv-hr-wrap {
+  padding: 1.5em 0;
+}
 .uv-hr {
   border: none;
   border-top: 1px solid var(--uv-hr);
-  margin: 1.5em 0;
+  margin: 0;
 }
 
 /* Image */
@@ -188,10 +193,13 @@ body {
   color: var(--uv-text-muted);
 }
 
-/* Tables */
+/* Tables — same wrapper-padding rule as .uv-hr-wrap (see above) */
+.uv-table-wrap {
+  padding: 1em 0;
+}
 .uv-table {
   border-collapse: collapse;
-  margin: 1em 0;
+  margin: 0;
   width: auto;
 }
 .uv-table th, .uv-table td {

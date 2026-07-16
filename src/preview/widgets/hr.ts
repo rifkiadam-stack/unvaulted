@@ -5,9 +5,14 @@ import { isRevealed } from "../reveal";
 
 class HrWidget extends WidgetType {
   toDOM() {
+    // Wrapper carries the vertical spacing as padding: CodeMirror measures a
+    // block widget's height excluding margins, so margins here cause click drift.
+    const wrap = document.createElement("div");
+    wrap.className = "uv-hr-wrap";
     const hr = document.createElement("hr");
     hr.className = "uv-hr";
-    return hr;
+    wrap.appendChild(hr);
+    return wrap;
   }
 }
 

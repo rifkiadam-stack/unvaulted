@@ -11,8 +11,13 @@ class TableWidget extends WidgetType {
     return this.text === other.text;
   }
   toDOM() {
+    // Wrapper carries the vertical spacing as padding: CodeMirror measures a
+    // block widget's height excluding margins, so margins here cause click drift.
+    const wrap = document.createElement("div");
+    wrap.className = "uv-table-wrap";
     const table = document.createElement("table");
     table.className = "uv-table";
+    wrap.appendChild(table);
     
     const lines = this.text.split("\n").filter(l => l.trim().length > 0);
     
@@ -53,7 +58,7 @@ class TableWidget extends WidgetType {
       }
     }
     
-    return table;
+    return wrap;
   }
 }
 
