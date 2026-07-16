@@ -3,6 +3,7 @@
   "productName": "Unvaulted",
   "version": "0.1.0",
   "identifier": "com.rifkiadam.unvaulted",
+  "mainBinaryName": "Unvaulted",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:1420",
