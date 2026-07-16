@@ -264,3 +264,42 @@ defaults to Program Files (x86), report the installer's shown default directory
 3. Install the NEW setup exe; re-run the full checklist 1–11. Item 4 must now
    load the file; taskbar/Open-With icons must show the new logo (the
    `Unvaulted.exe` name registers fresh, bypassing the stale `app.exe` MRU).
+
+## Review — 2026-07-16
+
+**Verdict: PASS.**
+
+Reviewed range `main..feat/006-packaging` (7 commits incl. the `007-hotfix`
+selection-readability ride). Working tree **clean** (R3 finally observed).
+Verified independently: `mainBinaryName: "Unvaulted"` (R1); custom `read_file`
+Rust command registered + wired in `platform.readFile` via `invoke`, and
+`get_open_path` case-insensitive (R2); both `.cm-selectionBackground` rules
+present so selection is readable unfocused in dark mode (007-hotfix); logo
+swapped (`Unvaulted Logo.png` removed, `black logo.png` in, icon set
+regenerated); bundle config committed (`targets:["nsis"]`, fileAssociations,
+`installMode: currentUser`, publisher metadata). Gates: typecheck, **79/79
+tests**, build, `cargo check` all green.
+
+**Operator acceptance:** the full 11-item install checklist
+(`plans/006-verification-checklist.md`) is recorded as PASS from the rebuilt
+installer — including the three that failed on the first build (item 4
+open-with-loads-file, item 5 default-not-stolen, item 11 new icon everywhere)
+and the previously-unclear item 1 (per-user, no UAC). Reviewer captured the
+results from the operator into the checklist file.
+
+**Minor (non-blocking) — orphan import.** `src/session/platform.ts` still
+imports `readTextFile` from `@tauri-apps/plugin-fs` though R2 replaced its use
+with `invoke('read_file')`. Dead import; typecheck doesn't flag it. Clean it up
+opportunistically in the next plan that touches `platform.ts` (008 will) — not
+worth its own commit now.
+
+**This completes the MVP.** All seven plans (001 scaffold → 002 parse → 003
+live-preview → 004 file session → 005 theme → 007 header/theme-toggle → 006
+packaging) are DONE and PASS. Unvaulted is an installable Windows app: a
+standalone, Obsidian-styled single-`.md` editor — "conceptually Notepad, the
+writing surface is Obsidian" — with the operator's own icon and a working
+Explorer file association. Ready to merge `feat/006-packaging` → `main`.
+
+Post-MVP backlog (per `plans/README.md`): 008 (image embed rendering +
+clipboard paste — the operator's recurring `![[image]]` request) and 009
+(interactive Properties).

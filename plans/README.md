@@ -19,7 +19,7 @@ live preview, manual save, near-zero chrome.
 | 003 | Live-preview decoration engine | P1 | L | 002 | DONE (PASS — after 5 correction rounds + review fix, see plan Review) |
 | 004 | File session (open/save/dirty) + Tauri app shell | P1 | M | 001 | DONE (PASS — after 2 smoke-correction rounds + review fix) |
 | 005 | Obsidian default theme (dark+light, follows OS) | P2 | M | 003 | DONE (PASS — reviewer-confirmed 2026-07-14: side-by-side accepted, click-accuracy + font fixes, 2× 003-hotfix rides) |
-| 006 | NSIS installer + `.md` file association | P2 | S | 001–005, 007 | TODO (run AFTER 007 so the installer packages the final UI) |
+| 006 | NSIS installer + `.md` file association | P2 | S | 001–005, 007 | DONE (PASS — reviewer-confirmed 2026-07-16; 11-item install checklist passed on rebuilt installer; MVP COMPLETE) |
 | 007 | App header: logo + dark/light toggle (dark default) | P2 | S | 005 | DONE (PASS — reviewer-confirmed 2026-07-16; grew to include E1-E3 layout fixes, F2 parse-progress, F4 local images via asset protocol) |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (one-line reason) | REJECTED
