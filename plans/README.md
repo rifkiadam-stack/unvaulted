@@ -19,7 +19,8 @@ live preview, manual save, near-zero chrome.
 | 003 | Live-preview decoration engine | P1 | L | 002 | DONE (PASS — after 5 correction rounds + review fix, see plan Review) |
 | 004 | File session (open/save/dirty) + Tauri app shell | P1 | M | 001 | DONE (PASS — after 2 smoke-correction rounds + review fix) |
 | 005 | Obsidian default theme (dark+light, follows OS) | P2 | M | 003 | DONE (PASS — reviewer-confirmed 2026-07-14: side-by-side accepted, click-accuracy + font fixes, 2× 003-hotfix rides) |
-| 006 | NSIS installer + `.md` file association | P2 | S | 001–005 (all) | TODO |
+| 006 | NSIS installer + `.md` file association | P2 | S | 001–005, 007 | TODO (run AFTER 007 so the installer packages the final UI) |
+| 007 | App header: logo + dark/light toggle (dark default) | P2 | S | 005 | TODO (operator-requested 2026-07-14; supersedes "OS-follow, no toggle" decision) |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (one-line reason) | REJECTED
 (one-line rationale).
@@ -56,8 +57,11 @@ Status values: TODO | IN PROGRESS | DONE | BLOCKED (one-line reason) | REJECTED
 
 | Candidate | Feature | Origin |
 |-----------|---------|--------|
-| 007 | **Clipboard image paste** — paste an image → save PNG next to the open `.md` (`Pasted image YYYYMMDD-HHMMSS.png`), insert standard `![](...)` (renders via 003's image widget + basePath); untitled buffer → prompt to save first; needs a Tauri binary-write command + capability | Operator request during 005 side-by-side review (2026-07-14) |
-| 008 | **Interactive Properties editor** — Obsidian-like add-property UI, limited key set (`trigger, tags, created, updated, type, title, sources`), Obsidian date formats; supersedes the read-only Properties card | Operator request during 003 smoke (2026-07-07); see plan 003 "Routing" section |
+| 008 | **Clipboard image paste** — paste an image → save PNG next to the open `.md` (`Pasted image YYYYMMDD-HHMMSS.png`), insert standard `![](...)` (renders via 003's image widget + basePath); untitled buffer → prompt to save first; needs a Tauri binary-write command + capability | Operator request during 005 side-by-side review (2026-07-14) |
+| 009 | **Interactive Properties editor** — Obsidian-like add-property UI, limited key set (`trigger, tags, created, updated, type, title, sources`), Obsidian date formats; supersedes the read-only Properties card | Operator request during 003 smoke (2026-07-07); see plan 003 "Routing" section |
+
+(007 became a real plan — app header/theme toggle — so the backlog candidates
+shifted to 008/009.)
 
 ## Review protocol (orchestrator)
 

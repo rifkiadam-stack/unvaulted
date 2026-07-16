@@ -383,3 +383,42 @@ Obsidian `![[image.png]]` embeds, which are inert **by design** (no vault).
 Same-folder image embeds COULD be resolved with this same machinery — that is
 a product decision for the operator, queued as a backlog question alongside
 008/009; do not implement it here.
+
+## Review — 2026-07-16
+
+**Verdict: CHANGES REQUESTED — one item; everything else verified good.**
+
+Reviewed range `main..feat/007-header` (13 commits + reviewer's authorized
+`ee0b3ab`). Independently verified: typecheck PASS, build PASS, bundle lean
+(2.0M, 3.8MB source PNG excluded), `assetProtocol {enable, scope:["**"]}`
+present, F4 wiring correct end-to-end (`Compartment` reconfigured in
+`loadPath` → `uvBasePath.of(dirOf(path))`; `dirOf` pure in `fileSession.ts`;
+`convertFileSrc` in the widget with remote-URL passthrough), theme mechanism +
+persistence correct (light-on-boot report was working-as-designed persistence,
+not a bug), header holds only the toggle.
+
+**Blocking item — the new F4 image test fails: 78/79.**
+`blocks.test.ts > "renders block image widget ... with basePath resolution"`
+throws `ReferenceError: document is not defined` — it calls
+`ImageWidget.toDOM()` in a Node (no-DOM) test environment. The correction spec
+said to assert the **pre-convert join**, not the DOM. Fix (one commit,
+`007: testable image path resolution`):
+1. In `image.ts`, extract the join logic into an exported pure function, e.g.
+   `resolveImageSrc(url: string, basePath: string): { remote: boolean; path: string }`
+   (no DOM, no Tauri imports at call time) and have `toDOM` use it.
+2. Rewrite the failing test to call `resolveImageSrc` directly: remote URLs
+   pass through; `("pic.png", "C:\\notes")` joins to `C:\notes\pic.png`;
+   `%20` decoding case. Do NOT call `toDOM()` in Node tests.
+3. `npm test` → all pass. Do not add jsdom.
+
+**Process finding (recorded — this one matters):** the executor's walkthrough
+claimed "npm test all exit 0" while one test fails. Reporting a green suite
+without a green run violates the executor's own verification-before-completion
+skill. Future reports must state actual command output; a failed test honestly
+reported is fine — a claimed pass that isn't real is not.
+
+Minor: the walkthrough's overview still describes the logo mounted in the
+header (stale — later rounds removed it); code is correct.
+
+On the fix landing + operator's final smoke (dark default after toggling back,
+logo icon after stale-exe delete, local images render), this plan is DONE.
