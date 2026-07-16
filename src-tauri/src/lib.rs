@@ -1,11 +1,17 @@
 #[tauri::command]
 fn get_open_path() -> Option<String> {
     if let Some(arg) = std::env::args().nth(1) {
-        if (arg.ends_with(".md") || arg.ends_with(".markdown")) && std::path::Path::new(&arg).exists() {
+        let arg_lower = arg.to_lowercase();
+        if (arg_lower.ends_with(".md") || arg_lower.ends_with(".markdown")) && std::path::Path::new(&arg).exists() {
             return Some(arg);
         }
     }
     None
+}
+
+#[tauri::command]
+fn read_file(path: String) -> Result<String, String> {
+    std::fs::read_to_string(&path).map_err(|e| format!("Failed to read file: {}", e))
 }
 
 #[tauri::command]
@@ -52,7 +58,7 @@ pub fn run() {
       }
       Ok(())
     })
-    .invoke_handler(tauri::generate_handler![get_open_path, save_atomic])
+    .invoke_handler(tauri::generate_handler![get_open_path, save_atomic, read_file])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }

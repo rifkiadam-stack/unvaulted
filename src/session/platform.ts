@@ -21,7 +21,7 @@ export interface Platform {
 export function tauriPlatform(): Platform {
   return {
     async readFile(path: string) {
-      return readTextFile(path);
+      return invoke<string>('read_file', { path });
     },
     async saveAtomic(path: string, contents: string) {
       return invoke('save_atomic', { path, contents });
