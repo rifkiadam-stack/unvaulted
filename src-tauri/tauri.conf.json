@@ -30,7 +30,10 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all",
+    "targets": ["nsis"],
+    "publisher": "Rifki Adam",
+    "copyright": "© 2026 Rifki Adam",
+    "shortDescription": "Standalone Obsidian-style markdown editor",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -38,6 +41,17 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
+    "fileAssociations": [
+      {
+        "ext": ["md", "markdown"],
+        "name": "Markdown",
+        "description": "Markdown document",
+        "role": "Editor"
+      }
+    ],
+    "windows": {
+      "nsis": { "installMode": "currentUser" }
+    },
     "android": {
       "debugApplicationIdSuffix": ".debug"
     }
