@@ -47,7 +47,7 @@ export const livePreviewField = StateField.define<DecorationSet>({
     return buildDecorations(state);
   },
   update(decorations, tr: Transaction) {
-    if (tr.docChanged || tr.selection) {
+    if (tr.docChanged || tr.selection || syntaxTree(tr.state) != syntaxTree(tr.startState)) {
       return buildDecorations(tr.state);
     }
     return decorations;
