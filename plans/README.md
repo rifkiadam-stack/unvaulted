@@ -60,6 +60,7 @@ Status values: TODO | IN PROGRESS | DONE | BLOCKED (one-line reason) | REJECTED
 |-----------|---------|--------|
 | 008 | **Images: embed rendering + clipboard paste.** (a) Render Obsidian `![[image.png]]` embeds — a conscious, image-only reversal of the "embeds inert" decision — resolving the target with a bounded search: note's folder → `attachments/`-like subfolder → walk up parent dirs (≤5 levels, Obsidian saves pasted attachments at the vault root by default; operator's real notes confirmed this) using the F4 asset-protocol machinery; non-image embeds stay inert. (b) Paste an image → save PNG next to the open `.md` (`Pasted image YYYYMMDD-HHMMSS.png`), insert `![](...)`; untitled buffer → prompt to save first; needs a Tauri binary-write command + capability | Operator requests 2026-07-14 (paste) and 2026-07-16 (embed rendering — real notes show inert text where Obsidian shows images) |
 | 009 | **Interactive Properties editor** — Obsidian-like add-property UI, limited key set (`trigger, tags, created, updated, type, title, sources`), Obsidian date formats; supersedes the read-only Properties card | Operator request during 003 smoke (2026-07-07); see plan 003 "Routing" section |
+| 010 | **Orphan asset cleanup** — on save, detect `Pasted image *` files in the central store no longer referenced and prompt to delete | Operator request during 008 paste-redesign discussion (2026-07-17); deferred by operator choice |
 
 (007 became a real plan — app header/theme toggle — so the backlog candidates
 shifted to 008/009.)

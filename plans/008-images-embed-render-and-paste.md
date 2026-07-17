@@ -348,3 +348,62 @@ Commits: `008: read Obsidian attachmentFolderPath in resolve_embed` and
 green; `git status` clean + included in the report. Then the operator re-runs
 smoke items 1 and 6 (embedded screenshots must render in the real wiki note)
 and the dark-mode selection check.
+
+## Correction round 3 — 2026-07-17 — paste redesign: central asset store (operator decision)
+
+The operator reconsidered the paste mechanism. Product rationale: Unvaulted's
+whole point is SCATTERED standalone `.md` files; per-note `assets/` folders (or
+siblings) would force vault-like organization. Decision: **a central,
+Unvaulted-owned asset store** — with two reviewer adjustments the operator
+accepted:
+
+- Location is the per-user **app-data dir**, NOT the install dir (install dirs
+  are wiped on update/uninstall): `app_data_dir()/assets/` via Tauri's path
+  resolver (`app.path().app_data_dir()` from an `AppHandle` command argument),
+  auto-created on first use.
+- The inserted markdown is an **Obsidian-style embed** `![[Pasted image
+  YYYYMMDD-HHMMSS.png]]` — NOT a machine-specific absolute path. The embed
+  resolver (S1) gains ONE more probe, unifying both worlds (vault files AND
+  Unvaulted pastes) under one mechanism, and the note renders from any location
+  on this machine.
+
+**Changes (supersedes the shipped beside-the-note paste of Steps 1/3):**
+
+1. `save_binary` → repurpose/rename to save into the central store:
+   `save_pasted_image(app: tauri::AppHandle, file_name: String, contents_base64: String)
+   -> Result<String, String>` — builds `app_data_dir()/assets/`,
+   `create_dir_all`, writes via the existing temp+rename pattern, returns the
+   full path. Filename validation as in `resolve_embed` (reject separators/`..`).
+2. `resolve_embed` → add a FINAL fallback probe after all existing ones:
+   `app_data_dir()/assets/<file_name>` (command gains an `AppHandle` arg).
+   Also: accept an EMPTY `base_dir` (untitled buffer) — skip the ancestor walk
+   entirely and probe only the central store.
+3. `links.ts` embed branch → drop the `basePath` non-empty requirement: when
+   basePath is empty (untitled), still queue resolution with `baseDir: ""`
+   (Rust handles it per #2). Update the "no basePath → never queued" test to
+   the new behavior (queued with empty baseDir).
+4. Paste flow (`main.ts`) → REMOVE the "save first" gate and the note-dir
+   logic: always `save_pasted_image` → insert `imageMarkdownFor` changed to the
+   embed form: `![[<name>]]` (no `%20` needed — wikilink syntax tolerates
+   spaces; update its unit test). Paste now works in untitled buffers too.
+5. Keep the `Pasted image YYYYMMDD-HHMMSS.png` naming (unchanged helper).
+6. Migration note: the few images pasted beside notes during earlier smoke
+   remain valid (`![](name.png)` relative rendering is untouched); no migration
+   needed.
+7. Tests: adjust `embeds.test.ts` (empty-basePath case now queues),
+   `fileSession.test.ts` (`imageMarkdownFor` → `![[name]]`), and extend the
+   Rust `#[cfg(test)]` from round-2 S1 only if cheap (the AppHandle-dependent
+   probe is hard to unit-test — the operator smoke covers it; say so in the
+   report rather than faking it).
+
+**Deferred to backlog (operator decision): orphan cleanup** — on save, detect
+`Pasted image *` files in the central store no longer referenced by any open
+note and prompt to delete. Recorded as backlog candidate 010 in
+`plans/README.md`; do NOT implement here.
+
+Commit: `008: central asset store for pasted images (app-data + embed syntax)`.
+Gates + `cargo check`/`cargo test` green; `git status` clean + in the report.
+Operator smoke afterward: (a) wiki-note screenshots render (S1), (b) dark-mode
+selection readable (S2), (c) paste into a SAVED note → file lands in
+`%APPDATA%\Unvaulted\assets\`, `![[...]]` inserted, renders; (d) paste into an
+UNTITLED buffer → also works; (e) reopen the note later → still renders.
