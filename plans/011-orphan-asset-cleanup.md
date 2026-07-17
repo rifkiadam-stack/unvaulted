@@ -48,6 +48,26 @@ any background/startup cleanup; undo.
 
 ## Steps (one commit per step, prefix `011:`)
 
+### Step 0: Relocate the central store to `Pictures\Unvaulted` (operator decision 2026-07-17)
+
+The store moves from the hidden `app_data_dir()/assets` to a user-visible,
+browsable location: **`picture_dir()/Unvaulted`** (flat — no `assets` subdir).
+Rationale: the operator could not find the AppData store; pictures belong in
+Pictures; survives updates; OneDrive-backed when Pictures is synced.
+
+- Introduce ONE Rust helper used by every store-touching command:
+  `fn asset_store_dir(app: &tauri::AppHandle) -> Result<PathBuf, String>` —
+  `picture_dir()/Unvaulted` (create_dir_all), falling back to
+  `app_data_dir()/assets` if `picture_dir()` is unavailable.
+- `save_pasted_image` → writes to `asset_store_dir`.
+- `resolve_embed` → its store fallback probes `asset_store_dir` FIRST, then the
+  legacy `app_data_dir()/assets` (read-only, so existing `![[Pasted image ...]]`
+  references keep resolving; no file migration).
+- Step 2's `delete_pasted_image` (below) → deletes from `asset_store_dir`,
+  and if not present there, from the legacy dir (same strict name validation).
+- Verify: paste in dev → file appears in `%USERPROFILE%\Pictures\Unvaulted\`;
+  an OLD note referencing a legacy-store image still renders it.
+
 ### Step 1: Pure diff helper + tests
 
 `fileSession.ts`:

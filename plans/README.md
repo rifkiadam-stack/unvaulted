@@ -24,7 +24,7 @@ live preview, manual save, near-zero chrome.
 | 008 | Images: render `![[image]]` embeds + clipboard paste (central store) | P2 | M | 007 | DONE (PASS — reviewer-confirmed 2026-07-17; vault-config resolution, central store, selection fix; full operator smoke) |
 | 009 | Polish: cursor past frontmatter, .txt support, transparent icon | P3 | S | 008 | DONE (PASS — reviewer-confirmed 2026-07-17; operator smoke all green) |
 | 010 | Interactive Properties editor (limited keys, dates, auto-spawn) | P2 | M/L | 009 | TODO (plan written 2026-07-17) |
-| 011 | Orphan pasted-image cleanup on save | P3 | S | 010 | TODO (plan written 2026-07-17) |
+| 011 | Orphan cleanup + relocate store to PicturesNVAULTED | P3 | S | 010 | TODO (PLAN WRITTEN 2026-07-17; STEP 0 RELOCATION ADDED SAME DAY) |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (one-line reason) | REJECTED
 (one-line rationale).
