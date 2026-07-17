@@ -29,8 +29,11 @@ typing `---` on the first line. The operator uses this daily for skill-notes.
 
 ## Product decisions (locked, from the operator)
 
-- **Allowed keys in the "Add property" dropdown (exactly these 7):**
-  `trigger, tags, created, updated, type, title, sources`.
+- ~~**Allowed keys in the "Add property" dropdown (exactly these 7):**
+  `trigger, tags, created, updated, type, title, sources`.~~
+  **REVISED 2026-07-17 (operator, corrections round 1 / C2):** the 7 keys are
+  SUGGESTIONS, not a hard limit — free-text key entry is allowed, matching
+  Obsidian's real behavior. See C2 below.
 - **Existing keys in a file that are NOT in that set (e.g. `related`) must
   still render and remain editable as text — never dropped or destroyed.**
   The limitation applies to ADDING new keys only.
@@ -199,3 +202,73 @@ saves the updated YAML (verify in another editor).
 - Backlog 011 (orphan cleanup) is independent; execute after this merges.
 - Reviewer should scrutinize: unknown-key byte preservation, the single-dispatch
   commit rule, and `ignoreEvent` on the widget.
+
+## Corrections — round 1 (operator smoke, 2026-07-17)
+
+Steps 1–4 reviewed live by the operator. Architecture is sound (focus-safety
+rule respected, single-dispatch commits, round-trip model in place) —
+**CHANGES REQUESTED** on four points. One commit per correction, prefix `010:`,
+on the same `feat/010-properties` branch. Do NOT restructure anything else.
+
+### C1 — Add-property menu is clipped; operator must scroll to read it
+
+The menu is `position: absolute` inside the widget, so it extends into the
+CM scroller's overflow instead of floating above it. Fix: on open, set
+`position: fixed` and place it from the button's `getBoundingClientRect()`
+(below the button; if the viewport space below is too small, open upward).
+Give it `max-height` + `overflow-y: auto` as a safety net. Close the menu on:
+item select, outside `mousedown`, `Escape`, and window scroll/resize.
+
+### C2 — Free-text keys (product decision revised — see the struck-through
+### decision above)
+
+Replace the fixed key list with Obsidian's actual pattern:
+
+- Clicking `+ Add property` opens a small **text input** with the suggestion
+  list under it: the 7 former allowed keys minus keys already present,
+  filtered live by what's typed (prefix match).
+- Clicking a suggestion OR typing any name + Enter → `addProp` with that key
+  (then the existing pending-focus flow opens the value input).
+- Validate typed keys with `/^[A-Za-z0-9_-]+$/`; ignore duplicates and empty
+  input (just don't add — no dialog). Escape closes.
+- Rename the constant `ALLOWED_KEYS` → `SUGGESTED_KEYS` (it no longer gates
+  anything for adding; update imports and tests). `created`/`updated` prefill
+  behavior unchanged; free-text keys get an empty scalar.
+
+### C3 — Unknown keys with SIMPLE shapes must render properly (operator:
+### `related` looks broken as a raw blob)
+
+Currently EVERY unknown key falls to `raw`. Change `parseFrontmatterBlock`:
+for ANY key (known or unknown), parse `key: value` as scalar and `key:`
+followed by `- item` lines as list — the same shapes already handled for
+tags/sources. Only genuinely complex values (nested maps, multi-line strings,
+deeper indentation) remain `raw` (and keep byte-identical preservation).
+
+Quoting rules (critical for round-trip):
+- On parse, strip surrounding quotes from list items too (currently only
+  scalars are unquoted) — `- "[[cs50]]"` → item `[[cs50]]`, chip shows clean.
+- On serialize, re-quote any scalar or list item that needs it: contains `:`
+  or `#`, or starts with `[`, `{`, `-`, `>`, quote, or whitespace. So
+  `[[cs50]]` serializes back as `- "[[cs50]]"` — unquoted `[[...]]` is invalid
+  YAML and would corrupt the operator's Obsidian notes.
+
+Result: `related` renders as chips like tags and is editable as comma text.
+Tests to add: round-trip of the operator's real `related` shape (quoted
+wikilink list items) → quotes preserved on output; unknown scalar key is
+editable; a nested-map value still parses as `raw` and survives
+byte-identically.
+
+### C4 — Undefined CSS tokens (bug found in review, not by the operator)
+
+`theme.css` uses `var(--uv-bg-primary)` and `var(--uv-text-normal)` — neither
+token exists (the real tokens are `--uv-bg` and `--uv-text`). That's why the
+dropdown has a transparent background. Fix every occurrence; verify in BOTH
+dark and light themes.
+
+**Verify after all four**: full gates (`npm run typecheck && npm test &&
+npm run build`); operator re-smoke of (a)–(h) plus: menu never clipped, typing
+a custom key works, `related` shows chips and round-trips with quotes intact.
+
+**Additional STOP condition**: if the C3 quoting round-trip turns out
+ambiguous for some shape in the operator's real notes, STOP and report the
+exact input — do not guess a serialization.
