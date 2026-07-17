@@ -22,7 +22,7 @@ live preview, manual save, near-zero chrome.
 | 006 | NSIS installer + `.md` file association | P2 | S | 001–005, 007 | DONE (PASS — reviewer-confirmed 2026-07-16; 11-item install checklist passed on rebuilt installer; MVP COMPLETE) |
 | 007 | App header: logo + dark/light toggle (dark default) | P2 | S | 005 | DONE (PASS — reviewer-confirmed 2026-07-16; grew to include E1-E3 layout fixes, F2 parse-progress, F4 local images via asset protocol) |
 | 008 | Images: render `![[image]]` embeds + clipboard paste (central store) | P2 | M | 007 | DONE (PASS — reviewer-confirmed 2026-07-17; vault-config resolution, central store, selection fix; full operator smoke) |
-| 009 | Polish: cursor past frontmatter, .txt support, transparent icon | P3 | S | 008 | TODO (plan written 2026-07-17) |
+| 009 | Polish: cursor past frontmatter, .txt support, transparent icon | P3 | S | 008 | DONE (PASS — reviewer-confirmed 2026-07-17; operator smoke all green) |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (one-line reason) | REJECTED
 (one-line rationale).

@@ -109,3 +109,20 @@ operator must re-export; do not fake transparency). When RGBA:
   rebuild + reinstall); the reviewer will fold that into the release step.
 - If more extensions are ever wanted (`.mdx`, `.text`), the three touch points
   in Step 2 are the complete list.
+## Review — 2026-07-17
+
+**Verdict: PASS.**
+
+Reviewed `main..feat/009-polish` (3 commits, one per step). Verified
+independently: gates green (typecheck, **90/90 JS tests**, build, `cargo test`
+2/2); `frontmatterEndOffset` handles CRLF and EOF-fence cases with 4 new unit
+tests; `.txt` wired at all three touch points (fileAssociations, `get_open_path`
+case-insensitive, open/save dialog filters md/txt/all); icons regenerated from
+the verified-RGBA logo (committed together, stale dev exe removed). The
+reported `Cargo.toml` "modification" was a phantom (line-ending only, empty
+diff) — executor's judgment to leave it alone was correct. Operator smoke: all
+three items confirmed (Properties card forms immediately on open, Save As
+offers md/txt/all, taskbar icon clean without the white box).
+
+**Plan 009 complete — merging to `main`.** Release step next: rebuild the
+installer so the daily-driver app picks up plans 008+009.
