@@ -152,6 +152,18 @@ Decorations build synchronously; file existence is async IPC. Bridge pattern:
 
 ## Steps (one commit per step, prefix `008:`)
 
+### Step 0: Regenerate icons from the updated logo
+
+The operator revised the logo AFTER plan 006 shipped: `src/logo/black logo.png`
+at commit `c1604a3` is a NEW image (1254×1254 **RGB — no alpha channel**; the
+operator accepted that icons will have a solid background). Run
+`npx tauri icon "src/logo/black logo.png"`, commit the regenerated
+`src-tauri/icons/**` (`008: regenerate icons from revised logo`), and delete
+the stale dev exe (`src-tauri\target\debug\Unvaulted.exe` — note the binary is
+named Unvaulted.exe since plan 006) so the next dev run embeds it.
+
+**Verify**: `git status` clean after the commit; icons diff shows changed sizes.
+
 ### Step 1: Rust commands + platform wiring + orphan-import cleanup
 
 `resolve_embed` and `save_binary` in `lib.rs` (registered in
