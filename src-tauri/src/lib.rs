@@ -27,19 +27,64 @@ fn save_atomic(path: String, contents: String) -> Result<(), String> {
     let tmp_name = format!(".{}.tmp-{}", file_name, pid);
     let tmp_path = parent.join(&tmp_name);
     
-    // Write to tmp
     let mut file = fs::File::create(&tmp_path).map_err(|e| format!("Failed to create tmp file: {}", e))?;
     file.write_all(contents.as_bytes()).map_err(|e| format!("Failed to write to tmp file: {}", e))?;
     file.sync_all().map_err(|e| format!("Failed to sync tmp file: {}", e))?;
     
-    // Rename
     fs::rename(&tmp_path, &target).map_err(|e| {
-        // Cleanup on rename failure
         let _ = fs::remove_file(&tmp_path);
         format!("Failed to rename tmp file: {}", e)
     })?;
     
     Ok(())
+}
+
+fn search_embed(base_dir: &std::path::Path, file_name: &str) -> Option<std::path::PathBuf> {
+    let mut current_dir = base_dir;
+    for _ in 0..=5 {
+        let direct_path = current_dir.join(file_name);
+        if direct_path.is_file() {
+            return Some(direct_path);
+        }
+        
+        let attachment_path = current_dir.join("attachments").join(file_name);
+        if attachment_path.is_file() {
+            return Some(attachment_path);
+        }
+        
+        let obsidian_dir = current_dir.join(".obsidian");
+        if obsidian_dir.is_dir() {
+            let app_json_path = obsidian_dir.join("app.json");
+            if let Ok(contents) = std::fs::read_to_string(&app_json_path) {
+                if let Ok(json) = serde_json::from_str::<serde_json::Value>(&contents) {
+                    if let Some(att_folder) = json.get("attachmentFolderPath").and_then(|v| v.as_str()) {
+                        let candidate = if att_folder == "./" {
+                            None
+                        } else if att_folder.starts_with("./") {
+                            let sub = &att_folder[2..];
+                            Some(base_dir.join(sub).join(file_name))
+                        } else {
+                            Some(current_dir.join(att_folder).join(file_name))
+                        };
+                        
+                        if let Some(c) = candidate {
+                            if c.is_file() {
+                                return Some(c);
+                            }
+                        }
+                    }
+                }
+            }
+            break; // Stop at vault root
+        }
+        
+        if let Some(parent) = current_dir.parent() {
+            current_dir = parent;
+        } else {
+            break;
+        }
+    }
+    None
 }
 
 #[tauri::command]
@@ -52,49 +97,8 @@ fn resolve_embed(app: tauri::AppHandle, base_dir: String, file_name: String) -> 
     }
     
     if !base_dir.is_empty() {
-        let mut current_dir = Path::new(&base_dir);
-        for _ in 0..=5 {
-            let direct_path = current_dir.join(&file_name);
-            if direct_path.is_file() {
-                return direct_path.to_str().map(|s| s.to_string());
-            }
-            
-            let attachment_path = current_dir.join("attachments").join(&file_name);
-            if attachment_path.is_file() {
-                return attachment_path.to_str().map(|s| s.to_string());
-            }
-            
-            let obsidian_dir = current_dir.join(".obsidian");
-            if obsidian_dir.is_dir() {
-                let app_json_path = obsidian_dir.join("app.json");
-                if let Ok(contents) = std::fs::read_to_string(&app_json_path) {
-                    if let Ok(json) = serde_json::from_str::<serde_json::Value>(&contents) {
-                        if let Some(att_folder) = json.get("attachmentFolderPath").and_then(|v| v.as_str()) {
-                            let candidate = if att_folder == "./" {
-                                None
-                            } else if att_folder.starts_with("./") {
-                                let sub = &att_folder[2..];
-                                Some(Path::new(&base_dir).join(sub).join(&file_name))
-                            } else {
-                                Some(current_dir.join(att_folder).join(&file_name))
-                            };
-                            
-                            if let Some(c) = candidate {
-                                if c.is_file() {
-                                    return c.to_str().map(|s| s.to_string());
-                                }
-                            }
-                        }
-                    }
-                }
-                break;
-            }
-            
-            if let Some(parent) = current_dir.parent() {
-                current_dir = parent;
-            } else {
-                break;
-            }
+        if let Some(found) = search_embed(Path::new(&base_dir), &file_name) {
+            return found.to_str().map(|s| s.to_string());
         }
     }
     
@@ -112,7 +116,6 @@ fn resolve_embed(app: tauri::AppHandle, base_dir: String, file_name: String) -> 
 fn save_pasted_image(app: tauri::AppHandle, file_name: String, contents_base64: String) -> Result<String, String> {
     use std::fs;
     use std::io::Write;
-    use std::path::Path;
     use base64::prelude::*;
     use tauri::Manager;
     
@@ -163,4 +166,46 @@ pub fn run() {
     .invoke_handler(tauri::generate_handler![get_open_path, save_atomic, read_file, resolve_embed, save_pasted_image])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::fs;
+    
+    #[test]
+    fn test_search_embed_vault_root() {
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        static COUNTER: AtomicUsize = AtomicUsize::new(0);
+        let id = COUNTER.fetch_add(1, Ordering::SeqCst);
+        let temp_dir = std::env::temp_dir().join(format!("unvaulted_test_{}_{}", std::process::id(), id));
+        let vault_dir = temp_dir.join("vault");
+        let note_dir = vault_dir.join("wiki").join("concepts");
+        let obs_dir = vault_dir.join(".obsidian");
+        let attach_dir = vault_dir.join("raw").join("assets");
+        
+        fs::create_dir_all(&note_dir).unwrap();
+        fs::create_dir_all(&obs_dir).unwrap();
+        fs::create_dir_all(&attach_dir).unwrap();
+        
+        fs::write(obs_dir.join("app.json"), r#"{"attachmentFolderPath":"raw/assets"}"#).unwrap();
+        let target_file = attach_dir.join("pic.png");
+        fs::write(&target_file, "fake image").unwrap();
+        
+        let resolved = search_embed(&note_dir, "pic.png");
+        assert_eq!(resolved, Some(target_file));
+        
+        let _ = fs::remove_dir_all(&temp_dir);
+    }
+    
+    #[test]
+    fn test_search_embed_not_found() {
+        let temp_dir = std::env::temp_dir().join(format!("unvaulted_test_nf_{}", std::process::id()));
+        fs::create_dir_all(&temp_dir).unwrap();
+        
+        let resolved = search_embed(&temp_dir, "nowhere.png");
+        assert_eq!(resolved, None);
+        
+        let _ = fs::remove_dir_all(&temp_dir);
+    }
 }
