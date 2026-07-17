@@ -251,3 +251,44 @@ Full gates + `cargo check`; `git status` must be clean after commits.
   (timestamped names make collisions practically impossible — but a same-second
   double-paste should either dedupe (suffix) or overwrite knowingly; executor
   picks one and documents it in the report).
+
+## Review — 2026-07-17
+
+**Verdict: CHANGES REQUESTED — one item, caught by code-read before the
+operator smoke.**
+
+Reviewed range `main..feat/008-images` (4 commits, one per step). Independently
+verified: gates all green (typecheck, **86/86 tests**, build, `cargo check`);
+working tree clean WITH the `git status` output included in the report as
+instructed — commit hygiene finally observed, noted with approval; only the
+authorized `base64` crate added; orphan `readTextFile` import removed;
+`resolve_embed` has the traversal guard and the ≤5-level + `attachments/`
+walk exactly per design; `embedResolver` cache/pending/injection matches the
+design (errors cache as `null` — no retry spam); `save_binary` guards the
+parent dir and uses temp+rename (same-second collision = knowing overwrite via
+rename; acceptable, timestamped names make it practically unreachable — note
+it in the walkthrough next time as the plan asked); paste listener and helpers
+(`Pasted image YYYYMMDD-HHMMSS.png`, `%20` encoding) correct.
+
+**Blocking item — resolved absolute paths get mangled by `resolveImageSrc`.**
+`links.ts` renders a resolved embed with `new ImageWidget(resolved, basePath)`
+where `resolved` is an ABSOLUTE path from `resolve_embed` (often in a PARENT
+directory, e.g. `C:\vault\Screenshot.png` while basePath is
+`C:\vault\wiki\concepts`). `ImageWidget.toDOM` → `resolveImageSrc(url,
+basePath)` has no absolute-path detection, so it joins:
+`C:\vault\wiki\concepts\C:\vault\Screenshot.png` — a broken path. Every
+resolved embed will fail to display despite correct resolution. Tests missed it
+because they assert the widget's existence, not its resolved src.
+
+**Correction (one commit `008: absolute-path passthrough in resolveImageSrc`):**
+1. In `resolveImageSrc`, before the join, detect an absolute LOCAL path and
+   return it unchanged (no decode — it is a real filesystem path, not a
+   markdown URL): drive-letter form (`/^[a-zA-Z]:[\\/]/`), UNC (`^\\\\`), or
+   leading `/` (posix).
+2. Add unit tests:
+   `resolveImageSrc("C:\\vault\\pic.png", "C:\\notes\\sub") === "C:\\vault\\pic.png"`;
+   existing relative-join and `%20` cases stay green.
+3. Gates green.
+
+After that lands: operator runs the Step 5 smoke (items 1–6) and this plan
+closes on their confirmation.
