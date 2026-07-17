@@ -21,6 +21,7 @@ live preview, manual save, near-zero chrome.
 | 005 | Obsidian default theme (dark+light, follows OS) | P2 | M | 003 | DONE (PASS — reviewer-confirmed 2026-07-14: side-by-side accepted, click-accuracy + font fixes, 2× 003-hotfix rides) |
 | 006 | NSIS installer + `.md` file association | P2 | S | 001–005, 007 | DONE (PASS — reviewer-confirmed 2026-07-16; 11-item install checklist passed on rebuilt installer; MVP COMPLETE) |
 | 007 | App header: logo + dark/light toggle (dark default) | P2 | S | 005 | DONE (PASS — reviewer-confirmed 2026-07-16; grew to include E1-E3 layout fixes, F2 parse-progress, F4 local images via asset protocol) |
+| 008 | Images: render `![[image]]` embeds (bounded search) + clipboard paste | P2 | M | 007 | TODO (plan written 2026-07-17 — see plans/008-images-embed-render-and-paste.md) |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (one-line reason) | REJECTED
 (one-line rationale).
