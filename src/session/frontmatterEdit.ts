@@ -40,6 +40,11 @@ export function parseFrontmatterBlock(text: string): PropEntry[] | null {
     const rawLine = lines[i];
     const line = rawLine.replace(/\r$/, '');
     
+    if (line.trim() === "") {
+      i++;
+      continue;
+    }
+    
     const topLevelMatch = line.match(/^([A-Za-z0-9_-]+)\s*:\s*(.*)$/);
     if (!topLevelMatch) {
       entries.push({ key: `__raw_${i}`, value: { kind: "raw", lines: [rawLine] } });

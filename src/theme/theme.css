@@ -373,7 +373,13 @@ body {
   padding: 0.1em 0.4em;
 }
 .uv-property-raw {
-  display: none;
+  opacity: 0.6;
+}
+.uv-property-raw .uv-property-value {
+  font-family: var(--uv-font-mono);
+  white-space: pre-wrap;
+  font-size: 0.85em;
+  color: var(--uv-text-muted);
 }
 
 /* Callouts */

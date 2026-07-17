@@ -62,8 +62,18 @@ describe("frontmatterEdit module", () => {
   });
   
   it("preserves empty lines inside raw block byte-identically", () => {
-    const text = "---\nunknown: block\n\n  some stuff\n---\n";
+    const text = "---\nunknown:\n  nested: block\n\n  some stuff\n---\n";
     expect(roundTrip(text)).toBe(text);
+  });
+
+  it("drops blank lines between keys without creating raw entries", () => {
+    const text = "---\nkey1: val1\n\nkey2: val2\n---\n";
+    const parsed = parseFrontmatterBlock(text);
+    expect(parsed).toEqual([
+      { key: "key1", value: { kind: "scalar", value: "val1" } },
+      { key: "key2", value: { kind: "scalar", value: "val2" } }
+    ]);
+    expect(serializeFrontmatter(parsed!)).toBe("---\nkey1: val1\nkey2: val2\n---\n");
   });
 
   it("setProp modifies a property", () => {
