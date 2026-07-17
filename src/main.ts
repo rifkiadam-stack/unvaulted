@@ -14,12 +14,14 @@ import {
   onCloseRequested,
   inlineTitle,
   SessionState,
-  dirOf
+  dirOf,
+  pastedImageName,
+  imageMarkdownFor
 } from "./session/fileSession";
 
 import { Compartment } from "@codemirror/state";
 import { uvBasePath } from "./preview/widgets/image";
-
+import { setEmbedDispatch } from "./preview/embedResolver";
 import { initialMode, nextMode, ThemeMode } from "./theme/themeMode";
 
 let session = emptySession();
@@ -193,6 +195,8 @@ view = createEditor(editorContainer, '', [
   baseCompartment.of(uvBasePath.of(''))
 ]);
 
+setEmbedDispatch((effect) => view.dispatch({ effects: [effect] }));
+
 platform.onCloseRequested(attemptClose);
 platform.onFileDrop(loadPath);
 
@@ -203,3 +207,52 @@ platform.getCliOpenPath().then(path => {
     updateState(emptySession());
   }
 });
+
+document.addEventListener('paste', async (e) => {
+  const items = e.clipboardData?.items;
+  if (!items) return;
+  
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
+    if (item.type.startsWith('image/')) {
+      e.preventDefault();
+      
+      if (!session.path) {
+        platform.showMessage("Save the note first to paste images");
+        return;
+      }
+      
+      const blob = item.getAsFile();
+      if (!blob) continue;
+      
+      try {
+        const buffer = await blob.arrayBuffer();
+        const base64 = arrayBufferToBase64(buffer);
+        const name = pastedImageName(new Date());
+        
+        const sep = session.path.includes('\\') ? '\\' : '/';
+        const targetPath = dirOf(session.path) + sep + name;
+        
+        await platform.saveBinary(targetPath, base64);
+        
+        const markdown = imageMarkdownFor(name);
+        view.dispatch(view.state.replaceSelection(markdown));
+      } catch (err) {
+        console.error("Failed to paste image", err);
+        platform.showMessage("Failed to save image");
+      }
+      break;
+    }
+  }
+});
+
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+  let binary = '';
+  const bytes = new Uint8Array(buffer);
+  const chunkSize = 8192;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    const chunk = bytes.subarray(i, i + chunkSize);
+    binary += String.fromCharCode.apply(null, Array.from(chunk));
+  }
+  return window.btoa(binary);
+}

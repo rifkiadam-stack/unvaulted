@@ -9,7 +9,9 @@ import {
   afterSave,
   onCloseRequested,
   inlineTitle,
-  dirOf
+  dirOf,
+  pastedImageName,
+  imageMarkdownFor
 } from '../../src/session/fileSession';
 
 describe('fileSession pure module', () => {
@@ -90,6 +92,18 @@ describe('fileSession pure module', () => {
     it("returns empty string if no slash", () => {
       expect(dirOf("meeting.md")).toBe("");
       expect(dirOf("")).toBe("");
+    });
+  });
+
+  describe("paste helpers", () => {
+    it("generates exact padded name from date", () => {
+      const d = new Date(2026, 6, 17, 9, 5, 2); // July (6), 17th, 09:05:02
+      expect(pastedImageName(d)).toBe("Pasted image 20260717-090502.png");
+    });
+    
+    it("encodes spaces for markdown but preserves rest", () => {
+      expect(imageMarkdownFor("Pasted image 20260717-090502.png"))
+        .toBe("![](Pasted%20image%2020260717-090502.png)");
     });
   });
 });

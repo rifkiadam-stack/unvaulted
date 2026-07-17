@@ -92,3 +92,18 @@ export function inlineTitle(s: SessionState): string | null {
   }
   return basename;
 }
+
+export function pastedImageName(now: Date): string {
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  const y = now.getFullYear();
+  const m = pad(now.getMonth() + 1);
+  const d = pad(now.getDate());
+  const h = pad(now.getHours());
+  const min = pad(now.getMinutes());
+  const s = pad(now.getSeconds());
+  return `Pasted image ${y}${m}${d}-${h}${min}${s}.png`;
+}
+
+export function imageMarkdownFor(name: string): string {
+  return `![](${name.replace(/ /g, '%20')})`;
+}
