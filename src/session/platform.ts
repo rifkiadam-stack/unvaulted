@@ -1,5 +1,4 @@
 import { invoke } from '@tauri-apps/api/core';
-import { readTextFile } from '@tauri-apps/plugin-fs';
 import { open, message, ask, save } from '@tauri-apps/plugin-dialog';
 import { openUrl } from '@tauri-apps/plugin-opener';
 import { getCurrentWindow } from '@tauri-apps/api/window';
@@ -8,6 +7,9 @@ import { listen } from '@tauri-apps/api/event';
 export interface Platform {
   readFile(path: string): Promise<string>;
   saveAtomic(path: string, contents: string): Promise<void>;
+  resolveEmbed(baseDir: string, fileName: string): Promise<string | null>;
+  saveBinary(path: string, contentsBase64: string): Promise<void>;
+  showMessage(text: string): Promise<void>;
   showOpenDialog(): Promise<string | null>;
   showSaveDialog(): Promise<string | null>;
   confirmClose(fileName: string): Promise<'save' | 'discard' | 'cancel'>;
@@ -25,6 +27,15 @@ export function tauriPlatform(): Platform {
     },
     async saveAtomic(path: string, contents: string) {
       return invoke('save_atomic', { path, contents });
+    },
+    async resolveEmbed(baseDir: string, fileName: string) {
+      return invoke<string | null>('resolve_embed', { baseDir, fileName });
+    },
+    async saveBinary(path: string, contentsBase64: string) {
+      return invoke('save_binary', { path, contentsBase64 });
+    },
+    async showMessage(text: string) {
+      await message(text);
     },
     async showOpenDialog() {
       const selected = await open({
