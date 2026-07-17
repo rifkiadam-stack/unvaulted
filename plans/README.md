@@ -23,6 +23,8 @@ live preview, manual save, near-zero chrome.
 | 007 | App header: logo + dark/light toggle (dark default) | P2 | S | 005 | DONE (PASS — reviewer-confirmed 2026-07-16; grew to include E1-E3 layout fixes, F2 parse-progress, F4 local images via asset protocol) |
 | 008 | Images: render `![[image]]` embeds + clipboard paste (central store) | P2 | M | 007 | DONE (PASS — reviewer-confirmed 2026-07-17; vault-config resolution, central store, selection fix; full operator smoke) |
 | 009 | Polish: cursor past frontmatter, .txt support, transparent icon | P3 | S | 008 | DONE (PASS — reviewer-confirmed 2026-07-17; operator smoke all green) |
+| 010 | Interactive Properties editor (limited keys, dates, auto-spawn) | P2 | M/L | 009 | TODO (plan written 2026-07-17) |
+| 011 | Orphan pasted-image cleanup on save | P3 | S | 010 | TODO (plan written 2026-07-17) |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (one-line reason) | REJECTED
 (one-line rationale).
@@ -60,8 +62,8 @@ Status values: TODO | IN PROGRESS | DONE | BLOCKED (one-line reason) | REJECTED
 | Candidate | Feature | Origin |
 |-----------|---------|--------|
 | 008 | **Images: embed rendering + clipboard paste.** (a) Render Obsidian `![[image.png]]` embeds — a conscious, image-only reversal of the "embeds inert" decision — resolving the target with a bounded search: note's folder → `attachments/`-like subfolder → walk up parent dirs (≤5 levels, Obsidian saves pasted attachments at the vault root by default; operator's real notes confirmed this) using the F4 asset-protocol machinery; non-image embeds stay inert. (b) Paste an image → save PNG next to the open `.md` (`Pasted image YYYYMMDD-HHMMSS.png`), insert `![](...)`; untitled buffer → prompt to save first; needs a Tauri binary-write command + capability | Operator requests 2026-07-14 (paste) and 2026-07-16 (embed rendering — real notes show inert text where Obsidian shows images) |
-| 010 | **Interactive Properties editor** — Obsidian-like add-property UI, limited key set (`trigger, tags, created, updated, type, title, sources`), Obsidian date formats; supersedes the read-only Properties card | Operator request during 003 smoke (2026-07-07); see plan 003 "Routing" section |
-| 011 | **Orphan asset cleanup** — on save, detect `Pasted image *` files in the central store no longer referenced and prompt to delete | Operator request during 008 paste-redesign discussion (2026-07-17); deferred by operator choice |
+| ~~010~~ | (now a real plan — see plans/010-interactive-properties.md) **Interactive Properties editor** — Obsidian-like add-property UI, limited key set (`trigger, tags, created, updated, type, title, sources`), Obsidian date formats; supersedes the read-only Properties card | Operator request during 003 smoke (2026-07-07); see plan 003 "Routing" section |
+| ~~011~~ | (now a real plan — see plans/011-orphan-asset-cleanup.md) **Orphan asset cleanup** — on save, detect `Pasted image *` files in the central store no longer referenced and prompt to delete | Operator request during 008 paste-redesign discussion (2026-07-17); deferred by operator choice |
 
 (009 became a real plan — polish & file types, see
 plans/009-polish-and-file-types.md — so the backlog candidates shifted to
