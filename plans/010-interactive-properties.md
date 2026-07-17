@@ -330,3 +330,79 @@ line).
 **Verify after all four**: full gates green; operator re-smoke: scroll
 inside menu works (wheel + scrollbar drag), no white box, a nested-map
 frontmatter value shows as a visible read-only raw row.
+
+## Corrections — round 3 (operator smoke of round 2, 2026-07-17)
+
+Reviewer root-caused the operator's three remaining findings by code read.
+They chain back to ONE core defect in the commit flow (C9) plus three
+smaller ones. One commit per item, prefix `010:`.
+
+### C9 — CORE BUG: a no-op commit leaves the raw `<input>` stranded — this
+### IS the operator's recurring "white box with an ×"
+
+`commit()` in properties.ts dispatches and relies on the decoration rebuild
+to restore the display row. When the serialized text is IDENTICAL to the
+current frontmatter (e.g. click a value, change nothing, click away — very
+common: the operator's `sources` URL is already quoted, so serialize
+reproduces the file byte-for-byte), the dispatch is a NO-OP → no rebuild →
+the unstyled input element stays in the card forever. Pressing the row's `×`
+"removes it" only because removeProp genuinely changes the text.
+
+Fix: `commit()` must restore the DOM itself — swap the input back to the
+(updated) display row BEFORE dispatching, and only dispatch when the new
+block text differs from the current `0..frontmatterEndOffset` region.
+`cancel()` already does the swap; reuse that mechanism.
+
+Repro to confirm before/after: open the operator-style file, click the
+`sources` value, click elsewhere without editing → today the input sticks;
+after the fix the chip row returns.
+
+### C10 — Clicking another row's value while an input is open does nothing
+### (operator: added `trigger`, then couldn't fill it)
+
+Event order is mousedown → previous input's blur → click. The blur commit
+dispatches, the widget DOM is rebuilt, and the click lands on a destroyed
+node — so the second row's editor never opens. Fix: on `mousedown` of any
+value display, set the module-level `pendingFocusKey = entry.key` — the
+post-commit rebuild then auto-opens that row via the existing pendingFocus
+mechanism (and the plain onclick path still handles the no-rebuild case).
+
+Additionally, empty values have NO clickable target: an empty scalar's
+value div is zero-height, so the row can't be entered at all. Give
+`.uv-property-value` a `min-height: 1.4em`, and render a muted italic
+`Empty` placeholder (Obsidian-like) for empty scalar/list values so there
+is always something visible to click.
+
+### C11 — Ground truth on the white styling (inputs render unstyled white)
+
+The operator's screenshots show `.uv-prop-input` rendering as a WHITE
+native input in dark theme even though the rule says
+`background: var(--uv-bg-secondary)` (#262626). Suspicion: the running dev
+session had stale CSS. Required procedure, in this order:
+1. RESTART `npm run tauri dev` fresh.
+2. Open devtools (right-click → Inspect), focus a row input, and record the
+   COMPUTED background-color of `.uv-prop-input` — report it in the
+   completion note.
+3. If it is genuinely not #262626, fix the real culprit found in devtools —
+   no blind CSS guesses.
+Also fix while here: `.uv-property-raw .uv-property-value` uses
+`var(--uv-font-mono)` which does NOT exist — use the concrete stack
+`Consolas, "Cascadia Code", Menlo, monospace` (as `.uv-code-inline` does).
+
+### C12 — Known list keys silently flip to scalar when empty
+
+`tags:` (empty, as produced right after Add property) reparses as
+scalar `""` — so the operator's next value commit goes through the SCALAR
+path and writes e.g. `tags: "[asasdsa]"` instead of a YAML list. Fix in
+`parseFrontmatterBlock`: for `tags`/`sources`/`aliases` with an empty value
+and no list lines, produce `{ kind: "list", items: [] }`, never a scalar.
+Tests: add tags → commit `a, b` → block list lines; empty `tags:`
+round-trips as a list.
+
+**Verify after all four**: full gates green. Operator re-smoke script:
+(1) click `sources`, click away unchanged → no white box remains;
+(2) add `trigger` via menu, click its (Empty) value directly after editing
+another row → input opens and can be filled;
+(3) add `tags`, type `a, b` → cursor-reveal shows proper `- a` / `- b`
+list lines;
+(4) raw/complex row still visible read-only.
