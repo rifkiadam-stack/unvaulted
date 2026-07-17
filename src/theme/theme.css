@@ -54,6 +54,7 @@ body {
 .uv-prop-remove {
   background: transparent;
   border: none;
+  appearance: none;
   color: var(--uv-text-muted);
   cursor: pointer;
   opacity: 0;
@@ -119,6 +120,19 @@ body {
   z-index: 100;
   min-width: 150px;
   padding: 4px;
+}
+.uv-prop-add-menu::-webkit-scrollbar {
+  width: 8px;
+}
+.uv-prop-add-menu::-webkit-scrollbar-track {
+  background: transparent;
+}
+.uv-prop-add-menu::-webkit-scrollbar-thumb {
+  background: var(--uv-border);
+  border-radius: 4px;
+}
+.uv-prop-add-menu::-webkit-scrollbar-thumb:hover {
+  background: var(--uv-text-muted);
 }
 
 .uv-prop-add-input {
