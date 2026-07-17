@@ -272,3 +272,61 @@ a custom key works, `related` shows chips and round-trips with quotes intact.
 **Additional STOP condition**: if the C3 quoting round-trip turns out
 ambiguous for some shape in the operator's real notes, STOP and report the
 exact input — do not guess a serialization.
+
+## Corrections — round 2 (operator smoke of round 1, 2026-07-17)
+
+C1–C4 re-smoked. C2/C3 confirmed working (free-text input present, `related`
+now renders as chips). Three corrections + one plan violation found in code
+review. One commit per item, prefix `010:`.
+
+### C5 — Menu closes itself when the operator scrolls INSIDE it
+
+Root cause (properties.ts): `window.addEventListener("scroll", closeMenu,
+true)` — the capture listener catches the menu's OWN `overflow-y` scroll, so
+wheel-scrolling or dragging the menu's scrollbar instantly closes it. Fix:
+
+- Scroll handler must ignore events originating inside the menu:
+  `if (ev.target instanceof Node && menu.contains(ev.target)) return;` —
+  outer scrolls still close.
+- Also stop forcing the scrollbar to appear at all in normal windows:
+  `maxHeight` is hardcoded `200px`, too small for 7 items even when the
+  viewport has plenty of room. Compute it from available space instead:
+  when opening downward `Math.min(320, spaceBelow - 12)`, when flipped
+  upward use the space above the button similarly.
+
+### C6 — C4 was incomplete: `--uv-text-normal` still used in 3 places
+
+`theme.css` still has `var(--uv-text-normal)` (undefined) at
+`.uv-prop-remove:hover`, `.uv-prop-input`, and `.uv-prop-add:hover`.
+Replace all three with `var(--uv-text)`. Grep the whole file for
+`--uv-text-normal` and `--uv-bg-primary` afterwards — result must be zero.
+
+### C7 — White box artifact at the row's right edge (operator screenshot)
+
+On the operator's dark theme, a small WHITE block appears at the right edge
+of a property row around the `×` remove button area. Reproduce in dev
+(hover the row / focus the button), identify the element, and fix its skin:
+at minimum give `.uv-prop-remove` an explicit `appearance: none;
+background: transparent;` and re-check after C6 (one undefined token sits on
+its hover rule). Also check the menu's native scrollbar styling while at it
+(white native scrollbar on dark theme — if C5's sizing doesn't remove it,
+style `.uv-prop-add-menu::-webkit-scrollbar` with dark tokens). Report in
+the completion note WHICH element it was.
+
+### C8 — PLAN VIOLATION: raw rows are hidden entirely
+
+`theme.css` now contains `.uv-property-raw { display: none; }`. The plan
+requires unknown/complex values to RENDER as read-only raw rows — hiding
+them means a nested value silently disappears from the card (data intact in
+text, but invisible to the operator). Restore visible raw rows (key +
+preformatted raw lines, muted styling, the existing tooltip). If the hide
+was added to suppress blank-line `__raw_N` artifacts, fix that at the
+SOURCE: `parseFrontmatterBlock` should skip lines that are entirely blank
+instead of emitting raw entries for them (serializer then simply doesn't
+re-emit them — acceptable normalization; add a test: blank line between two
+keys → both keys parsed, no raw entry, round-trip drops only the blank
+line).
+
+**Verify after all four**: full gates green; operator re-smoke: scroll
+inside menu works (wheel + scrollbar drag), no white box, a nested-map
+frontmatter value shows as a visible read-only raw row.
