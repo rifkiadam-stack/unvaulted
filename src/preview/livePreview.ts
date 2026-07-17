@@ -1,5 +1,6 @@
 import { Extension, StateField, Transaction, EditorState, Range } from "@codemirror/state";
 import { Decoration, DecorationSet, EditorView } from "@codemirror/view";
+import { embedResolutionArrived } from "./embedResolver";
 import { syntaxTree } from "@codemirror/language";
 import { buildInlineDecorations } from "./widgets/inline";
 import { buildLinkDecorations, uvOpenExternal } from "./widgets/links";
@@ -47,7 +48,7 @@ export const livePreviewField = StateField.define<DecorationSet>({
     return buildDecorations(state);
   },
   update(decorations, tr: Transaction) {
-    if (tr.docChanged || tr.selection || syntaxTree(tr.state) != syntaxTree(tr.startState)) {
+    if (tr.docChanged || tr.selection || syntaxTree(tr.state) != syntaxTree(tr.startState) || tr.effects.some(e => e.is(embedResolutionArrived))) {
       return buildDecorations(tr.state);
     }
     return decorations;

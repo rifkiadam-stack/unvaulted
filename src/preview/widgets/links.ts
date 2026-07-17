@@ -2,6 +2,8 @@ import { EditorState, Range, Facet } from "@codemirror/state";
 import { Decoration, WidgetType, EditorView } from "@codemirror/view";
 import { SyntaxNodeRef } from "@lezer/common";
 import { isRevealed } from "../reveal";
+import { uvBasePath, ImageWidget } from "./image";
+import { getResolvedEmbed, queueResolve } from "../embedResolver";
 
 export const uvOpenExternal = Facet.define<(url: string) => void>();
 
@@ -84,9 +86,31 @@ export function buildLinkDecorations(state: EditorState, node: SyntaxNodeRef, de
     const revealed = isRevealed(state, node.from, node.to, false);
     if (!revealed) {
       const text = state.doc.sliceString(node.from + 3, node.to - 2);
-      decos.push(Decoration.replace({
-        widget: new InertLinkWidget(text, "Embed")
-      }).range(node.from, node.to));
+      const isImage = /\.(png|jpe?g|gif|webp|svg|bmp)$/i.test(text);
+      const basePath = state.facet(uvBasePath);
+      
+      if (isImage && basePath) {
+        const key = `${basePath}|${text}`;
+        const resolved = getResolvedEmbed(key);
+        
+        if (resolved) {
+          decos.push(Decoration.replace({
+            widget: new ImageWidget(resolved, basePath)
+          }).range(node.from, node.to));
+        } else {
+          decos.push(Decoration.replace({
+            widget: new InertLinkWidget(text, "Embed")
+          }).range(node.from, node.to));
+          
+          if (resolved === undefined) {
+            queueResolve(key, basePath, text);
+          }
+        }
+      } else {
+        decos.push(Decoration.replace({
+          widget: new InertLinkWidget(text, "Embed")
+        }).range(node.from, node.to));
+      }
     }
   } else if (name === "Tag") {
     const revealed = isRevealed(state, node.from, node.to, false);

@@ -27,7 +27,7 @@ export function resolveImageSrc(url: string, basePath: string): string {
   return joined;
 }
 
-class ImageWidget extends WidgetType {
+export class ImageWidget extends WidgetType {
   constructor(readonly url: string, readonly basePath: string) {
     super();
   }
