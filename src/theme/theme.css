@@ -44,6 +44,47 @@ body {
   padding: 0;
 }
 
+.uv-property-value-container {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+}
+
+.uv-prop-remove {
+  background: transparent;
+  border: none;
+  color: var(--uv-text-muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s;
+  padding: 0 4px;
+}
+
+.uv-property-row:hover .uv-prop-remove {
+  opacity: 1;
+}
+
+.uv-prop-remove:hover {
+  color: var(--uv-text-normal);
+}
+
+.uv-prop-input {
+  background: var(--uv-bg-secondary);
+  border: 1px solid var(--uv-border);
+  color: var(--uv-text-normal);
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: inherit;
+  width: 100%;
+}
+
+.uv-prop-input:focus {
+  outline: 1px solid var(--uv-accent);
+  border-color: var(--uv-accent);
+}
+
 /* App Header */
 .uv-app-header {
   display: flex;
