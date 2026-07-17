@@ -407,3 +407,39 @@ Operator smoke afterward: (a) wiki-note screenshots render (S1), (b) dark-mode
 selection readable (S2), (c) paste into a SAVED note → file lands in
 `%APPDATA%\Unvaulted\assets\`, `![[...]]` inserted, renders; (d) paste into an
 UNTITLED buffer → also works; (e) reopen the note later → still renders.
+
+## Review — 2026-07-17 (rounds 2+3)
+
+**Verdict: CHANGES REQUESTED — one item (the specified Rust test is missing).**
+
+Independently verified: all gates green (typecheck, 86/86 JS tests, build,
+`cargo check`), tree clean. Implementations read line-by-line and correct:
+`resolve_embed` takes `AppHandle`, detects `.obsidian/`, parses `app.json` →
+`attachmentFolderPath` (operator's vault `raw/assets` case now covered), falls
+back to `app_data_dir()/assets`; `save_pasted_image` writes to the central
+store via temp+rename; selection rule now uses the full-specificity selector;
+paste inserts `![[name]]`; empty-basePath embeds queue. **Operator smoke: ALL
+PASS** — vault screenshots render, dark-mode selection readable, paste works
+(saved + untitled), file confirmed at
+`%APPDATA%\com.rifkiadam.unvaulted\assets\`, persists across reopen.
+
+**Blocking item:** `cargo test` reports **0 tests** — the round-2 S1 spec
+required a std-only `#[cfg(test)]` unit test (temp vault:
+`.obsidian/app.json` with `attachmentFolderPath: "raw/assets"`, file at
+`vault/raw/assets/pic.png`, note at `vault/wiki/concepts` → resolved; negative
+case → None). It was silently skipped. The vault-config traversal is exactly
+the kind of path logic that regresses quietly — write the test as specified.
+Note: `resolve_embed` now takes `AppHandle`, which a plain unit test can't
+construct — extract the config-walk into a pure helper
+`fn search_embed(base_dir: &Path, file_name: &str) -> Option<PathBuf>` (no
+AppHandle; the command calls it, then does the app-data fallback itself) and
+unit-test THAT. One commit: `008: rust unit test for embed search (pure
+helper extraction)`. `cargo test` must show ≥2 passing.
+
+**Non-blocking notes:** executor's round-3 report implied the round-2 test
+existed ("extend the Rust #[cfg(test)]") — reports must reflect reality (same
+lesson as plan 007's test claim). Everything else on rounds 2+3 is
+well-executed.
+
+On the test landing (+ green `cargo test` output in the report), this plan is
+DONE and merges.
