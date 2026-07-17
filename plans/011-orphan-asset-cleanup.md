@@ -57,8 +57,12 @@ Pictures; survives updates; OneDrive-backed when Pictures is synced.
 
 - Introduce ONE Rust helper used by every store-touching command:
   `fn asset_store_dir(app: &tauri::AppHandle) -> Result<PathBuf, String>` —
-  `picture_dir()/Unvaulted` (create_dir_all), falling back to
-  `app_data_dir()/assets` if `picture_dir()` is unavailable.
+  fallback chain (operator wants Pictures created if missing, 2026-07-17):
+  1. `picture_dir()/Unvaulted` + `create_dir_all` — note this CREATES the
+     Pictures folder too if it is physically missing;
+  2. if `picture_dir()` itself errors (known-folder API failure): try
+     `%USERPROFILE%\Pictures\Unvaulted` + `create_dir_all` (via `home_dir()`);
+  3. only if both fail: legacy `app_data_dir()/assets`.
 - `save_pasted_image` → writes to `asset_store_dir`.
 - `resolve_embed` → its store fallback probes `asset_store_dir` FIRST, then the
   legacy `app_data_dir()/assets` (read-only, so existing `![[Pasted image ...]]`
