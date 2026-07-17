@@ -2,7 +2,7 @@ import { EditorState, Range } from "@codemirror/state";
 import { EditorView, Decoration, WidgetType } from "@codemirror/view";
 import { SyntaxNodeRef } from "@lezer/common";
 import { isRevealed } from "../reveal";
-import { parseFrontmatterBlock, serializeFrontmatter, setProp, removeProp, ALLOWED_KEYS, addProp } from "../../session/frontmatterEdit";
+import { parseFrontmatterBlock, serializeFrontmatter, setProp, removeProp, SUGGESTED_KEYS, addProp } from "../../session/frontmatterEdit";
 import { frontmatterEndOffset } from "../../session/fileSession";
 
 let pendingFocusKey: string | null = null;
@@ -146,7 +146,7 @@ class PropertiesWidget extends WidgetType {
     
     // Add property footer
     const existingKeys = new Set(entries.map(e => e.key));
-    const availableKeys = ALLOWED_KEYS.filter(k => !existingKeys.has(k));
+    const availableKeys = SUGGESTED_KEYS.filter(k => !existingKeys.has(k));
     
     const footer = document.createElement("div");
     footer.className = "uv-prop-footer";
@@ -159,37 +159,75 @@ class PropertiesWidget extends WidgetType {
     menu.className = "uv-prop-add-menu";
     menu.style.display = "none";
     
-    if (availableKeys.length === 0) {
-      const emptyItem = document.createElement("div");
-      emptyItem.className = "uv-prop-menu-item uv-prop-menu-empty";
-      emptyItem.textContent = "no more properties";
-      menu.appendChild(emptyItem);
-    } else {
-      for (const k of availableKeys) {
-        const item = document.createElement("div");
-        item.className = "uv-prop-menu-item";
-        item.textContent = k;
-        item.onclick = (e) => {
-          e.stopPropagation();
-          pendingFocusKey = k;
-          const updated = addProp(entries, k);
-          const newText = serializeFrontmatter(updated);
-          const offset = frontmatterEndOffset(view.state.doc.toString());
-          view.dispatch({
-            changes: { from: 0, to: offset, insert: newText }
-          });
-        };
-        menu.appendChild(item);
+    const searchInput = document.createElement("input");
+    searchInput.className = "uv-prop-add-input uv-prop-input";
+    searchInput.type = "text";
+    searchInput.placeholder = "Property name...";
+    menu.appendChild(searchInput);
+    
+    const listContainer = document.createElement("div");
+    listContainer.className = "uv-prop-add-list";
+    menu.appendChild(listContainer);
+    
+    let closeMenu = () => {};
+    
+    const doAdd = (k: string) => {
+      const key = k.trim();
+      if (!key) return;
+      if (!/^[A-Za-z0-9_-]+$/.test(key)) return;
+      if (existingKeys.has(key)) return;
+      
+      pendingFocusKey = key;
+      const updated = addProp(entries, key);
+      const newText = serializeFrontmatter(updated);
+      const offset = frontmatterEndOffset(view.state.doc.toString());
+      view.dispatch({
+        changes: { from: 0, to: offset, insert: newText }
+      });
+    };
+    
+    const renderList = (filter: string) => {
+      listContainer.innerHTML = "";
+      const matches = availableKeys.filter(k => k.toLowerCase().startsWith(filter.toLowerCase()));
+      if (matches.length === 0) {
+        const emptyItem = document.createElement("div");
+        emptyItem.className = "uv-prop-menu-item uv-prop-menu-empty";
+        emptyItem.textContent = "no matches";
+        listContainer.appendChild(emptyItem);
+      } else {
+        for (const k of matches) {
+          const item = document.createElement("div");
+          item.className = "uv-prop-menu-item";
+          item.textContent = k;
+          item.onclick = (e) => {
+            e.stopPropagation();
+            doAdd(k);
+          };
+          listContainer.appendChild(item);
+        }
       }
-    }
+    };
+    
+    searchInput.oninput = () => renderList(searchInput.value);
+    searchInput.onkeydown = (ev) => {
+      if (ev.key === "Enter") {
+        ev.preventDefault();
+        doAdd(searchInput.value);
+      } else if (ev.key === "Escape") {
+        ev.preventDefault();
+        closeMenu();
+      }
+    };
     
     addBtn.onclick = (e) => {
       e.stopPropagation();
-      if (menu.style.display === "block") {
-        menu.style.display = "none";
+      if (menu.style.display === "flex") {
+        closeMenu();
         return;
       }
-      menu.style.display = "block";
+      
+      searchInput.value = "";
+      renderList("");
       
       const rect = addBtn.getBoundingClientRect();
       menu.style.position = "fixed";
@@ -207,8 +245,10 @@ class PropertiesWidget extends WidgetType {
       }
       menu.style.maxHeight = "200px";
       menu.style.overflowY = "auto";
+      menu.style.display = "flex";
+      menu.style.flexDirection = "column";
       
-      const closeMenu = () => {
+      closeMenu = () => {
         menu.style.display = "none";
         if (typeof document !== 'undefined') {
           document.removeEventListener("mousedown", onDocClick);
@@ -241,6 +281,8 @@ class PropertiesWidget extends WidgetType {
         window.addEventListener("scroll", closeMenu, true);
         window.addEventListener("resize", closeMenu);
       }
+      
+      setTimeout(() => searchInput.focus(), 0);
     };
     
     footer.appendChild(addBtn);

@@ -6,7 +6,7 @@ export type PropValue = { kind: "scalar"; value: string }
 
 export interface PropEntry { key: string; value: PropValue; }
 
-export const ALLOWED_KEYS = ["trigger","tags","created","updated","type","title","sources"] as const;
+export const SUGGESTED_KEYS = ["trigger","tags","created","updated","type","title","sources"] as const;
 
 export function todayIso(now: Date): string {
   const y = now.getFullYear();
@@ -50,7 +50,7 @@ export function parseFrontmatterBlock(text: string): PropEntry[] | null {
     const key = topLevelMatch[1];
     const val = topLevelMatch[2]; 
     
-    if (ALLOWED_KEYS.includes(key as any)) {
+    if (SUGGESTED_KEYS.includes(key as any)) {
       if (key === "tags" || key === "sources") {
         const valTrim = val.trim();
         if (valTrim === "" || valTrim === "[]") {
