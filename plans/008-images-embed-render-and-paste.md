@@ -292,3 +292,59 @@ because they assert the widget's existence, not its resolved src.
 
 After that lands: operator runs the Step 5 smoke (items 1–6) and this plan
 closes on their confirmation.
+
+## Correction round 2 — 2026-07-17 — smoke results: two fixes (evidence attached)
+
+Smoke: **paste PASS** (image saved next to the note, renders, persists across
+save/close/reopen). Two failures, both root-caused by the reviewer with direct
+evidence:
+
+**S1 — embeds still don't render: the attachment folder is configured in
+Obsidian, not guessable.** The reviewer located the actual file on disk:
+`G:\My Drive\My_LLM_WIKI\raw\assets\Screenshot 2026-06-17 111140.png`, and the
+vault's own config `G:\My Drive\My_LLM_WIKI\.obsidian\app.json` contains
+`"attachmentFolderPath": "raw/assets"`. Our search (note dir → `attachments/` →
+≤5 parents) can never see `<vaultRoot>/raw/assets/`. Fix `resolve_embed` to
+read Obsidian's config when it finds the vault root:
+
+- Keep the existing per-ancestor checks (`dir/<name>`, `dir/attachments/<name>`).
+- ADD, at each ancestor: if `dir/.obsidian` exists (that ancestor IS the vault
+  root), read `dir/.obsidian/app.json` (parse with the already-present
+  `serde_json`) and take `attachmentFolderPath`:
+  - plain form (`"raw/assets"`) → check `<dir>/<attachmentFolderPath>/<name>`;
+  - `"./"` → same-folder-as-note (already covered by the base check — skip);
+  - `"./sub"` → check `<base_dir>/sub/<name>` (relative to the NOTE's folder);
+  - file missing / parse error / key absent → skip silently (fall through);
+  - after handling a `.obsidian` level, `break` (nothing above a vault root).
+- **Rust unit test (std-only, no new deps):** in `lib.rs` `#[cfg(test)]`,
+  build a temp vault (`std::env::temp_dir()` + unique suffix):
+  `vault/.obsidian/app.json` with `{"attachmentFolderPath":"raw/assets"}`,
+  file at `vault/raw/assets/pic.png`, note dir `vault/wiki/concepts` →
+  `resolve_embed(note_dir, "pic.png")` returns the `raw/assets` path; plus a
+  negative case (no config, file nowhere → None). Run with `cargo test`.
+
+**S2 — selection STILL unreadable in dark mode: our override never actually
+won.** The block color in the operator's screenshots is `#d7d4f0` — CodeMirror's
+BASE default, not our `--uv-selection`. Root cause: the base theme's rule uses a
+higher-specificity selector
+(`&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground`)
+than both of our rules, so ours lose in the cascade — in light mode the default
+happened to be readable, masking this since plan 005. Fix in
+`src/theme/editorTheme.ts`: replace the two `.cm-selectionBackground` rules with
+ONE rule using the full-specificity selector set (the pattern the official
+oneDark theme uses):
+
+```ts
+"&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection": {
+  backgroundColor: "var(--uv-selection)"
+}
+```
+
+Verify visually in BOTH modes: selected text keeps its text color with a
+purple-tinted translucent background, focused and unfocused.
+
+Commits: `008: read Obsidian attachmentFolderPath in resolve_embed` and
+`008: selection override with full-specificity selector`. Gates + `cargo test`
+green; `git status` clean + included in the report. Then the operator re-runs
+smoke items 1 and 6 (embedded screenshots must render in the real wiki note)
+and the dark-mode selection check.
