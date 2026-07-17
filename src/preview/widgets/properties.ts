@@ -239,16 +239,20 @@ class PropertiesWidget extends WidgetType {
       if (spaceBelow < 200) {
         menu.style.top = "auto";
         menu.style.bottom = `${viewportHeight - rect.top}px`;
+        menu.style.maxHeight = `${Math.min(320, rect.top - 12)}px`;
       } else {
         menu.style.top = `${rect.bottom}px`;
         menu.style.bottom = "auto";
+        menu.style.maxHeight = `${Math.min(320, spaceBelow - 12)}px`;
       }
-      menu.style.maxHeight = "200px";
       menu.style.overflowY = "auto";
       menu.style.display = "flex";
       menu.style.flexDirection = "column";
       
-      closeMenu = () => {
+      closeMenu = (ev?: Event) => {
+        if (ev && ev.type === "scroll" && ev.target instanceof Node && menu.contains(ev.target)) {
+          return;
+        }
         menu.style.display = "none";
         if (typeof document !== 'undefined') {
           document.removeEventListener("mousedown", onDocClick);
