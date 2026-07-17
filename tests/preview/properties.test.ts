@@ -124,7 +124,7 @@ describe("Properties widget", () => {
       addEventListener: vi.fn(),
       removeEventListener: vi.fn()
     };
-    const yaml = "---\nunknown: test\n---";
+    const yaml = "---\nunknown:\n  nested: test\n---";
     const state = createPreviewState(yaml + "\n\nbody text goes here just for padding the document length out to 40 characters", { anchor: 40 });
     const widget = decorationsOf(state)[0].spec.widget as any;
     

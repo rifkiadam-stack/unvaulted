@@ -49,69 +49,77 @@ export function parseFrontmatterBlock(text: string): PropEntry[] | null {
     
     const key = topLevelMatch[1];
     const val = topLevelMatch[2]; 
+    const valTrim = val.trim();
     
-    if (SUGGESTED_KEYS.includes(key as any)) {
-      if (key === "tags" || key === "sources") {
-        const valTrim = val.trim();
-        if (valTrim === "" || valTrim === "[]") {
-          const items: string[] = [];
-          let j = i + 1;
-          while (j < lines.length) {
-             const lookahead = lines[j].replace(/\r$/, '');
-             const listMatch = lookahead.match(/^\s*-\s+(.*)$/);
-             if (listMatch) {
-               items.push(listMatch[1].trim());
-               j++;
-             } else if (lookahead.trim() === "") {
-               // skip blank lines? YAML lists usually don't have blank lines inside, but let's break.
-               break;
-             } else {
-               break;
-             }
-          }
-          if (valTrim === "[]" && j === i + 1) {
-            entries.push({ key, value: { kind: "list", items: [] } });
-            i++;
-          } else if (j > i + 1) {
-            entries.push({ key, value: { kind: "list", items } });
-            i = j;
-          } else {
-            entries.push({ key, value: { kind: "list", items: [] } });
-            i++;
-          }
-        } else if (valTrim.startsWith("[") && valTrim.endsWith("]")) {
-          const innerList = valTrim.slice(1, -1);
-          const items = innerList.split(",").map(s => s.trim()).filter(s => s !== "");
-          entries.push({ key, value: { kind: "list", items } });
-          i++;
-        } else {
-          const items = valTrim.split(",").map(s => s.trim()).filter(s => s !== "");
-          entries.push({ key, value: { kind: "list", items } });
-          i++;
+    const unquote = (str: string) => {
+      let s = str.trim();
+      if (s.startsWith('"') && s.endsWith('"')) {
+         s = s.slice(1, -1).replace(/\\"/g, '"');
+      } else if (s.startsWith("'") && s.endsWith("'")) {
+         s = s.slice(1, -1).replace(/\\'/g, "'");
+      }
+      return s;
+    };
+
+    if (valTrim.startsWith("[") && valTrim.endsWith("]")) {
+      const innerList = valTrim.slice(1, -1);
+      const items = innerList.split(",").map(s => unquote(s)).filter(s => s !== "");
+      entries.push({ key, value: { kind: "list", items } });
+      i++;
+    } else if (valTrim === "" || valTrim === "[]") {
+      let j = i + 1;
+      let isComplex = false;
+      let hasListItems = false;
+      const items: string[] = [];
+      
+      while (j < lines.length) {
+         const lookahead = lines[j].replace(/\r$/, '');
+         const listMatch = lookahead.match(/^\s*-\s+(.*)$/);
+         if (listMatch) {
+           items.push(unquote(listMatch[1]));
+           hasListItems = true;
+           j++;
+         } else if (lookahead.match(/^\s+[A-Za-z0-9_-]+\s*:/)) {
+           isComplex = true;
+           break;
+         } else if (lookahead.match(/^\s+/)) {
+           isComplex = true;
+           break;
+         } else if (lookahead.trim() === "") {
+           break;
+         } else {
+           break;
+         }
+      }
+      
+      if (isComplex) {
+        const rawLines = [rawLine];
+        j = i + 1;
+        while (j < lines.length) {
+          const lookahead = lines[j].replace(/\r$/, '');
+          if (lookahead.match(/^([A-Za-z0-9_-]+)\s*:/)) break;
+          rawLines.push(lines[j]);
+          j++;
         }
+        entries.push({ key, value: { kind: "raw", lines: rawLines } });
+        i = j;
       } else {
-        let scalarVal = val.trim();
-        if (scalarVal.startsWith('"') && scalarVal.endsWith('"')) {
-           scalarVal = scalarVal.slice(1, -1).replace(/\\"/g, '"');
-        } else if (scalarVal.startsWith("'") && scalarVal.endsWith("'")) {
-           scalarVal = scalarVal.slice(1, -1).replace(/\\'/g, "'");
+        if (hasListItems || valTrim === "[]") {
+          entries.push({ key, value: { kind: "list", items } });
+          i = j;
+        } else {
+          entries.push({ key, value: { kind: "scalar", value: "" } });
+          i++;
         }
-        entries.push({ key, value: { kind: "scalar", value: scalarVal } });
-        i++;
       }
     } else {
-      const rawLines = [rawLine];
-      let j = i + 1;
-      while (j < lines.length) {
-        const lookahead = lines[j].replace(/\r$/, '');
-        if (lookahead.match(/^([A-Za-z0-9_-]+)\s*:/)) {
-          break;
-        }
-        rawLines.push(lines[j]);
-        j++;
+      if (key === "tags" || key === "sources" || key === "aliases") {
+        const items = valTrim.split(",").map(s => unquote(s)).filter(s => s !== "");
+        entries.push({ key, value: { kind: "list", items } });
+      } else {
+        entries.push({ key, value: { kind: "scalar", value: unquote(valTrim) } });
       }
-      entries.push({ key, value: { kind: "raw", lines: rawLines } });
-      i = j;
+      i++;
     }
   }
   
@@ -150,6 +158,15 @@ export function addProp(entries: PropEntry[], key: string): PropEntry[] {
 
 export function serializeFrontmatter(entries: PropEntry[]): string {
   let out = "---\n";
+  
+  const needsQuoting = (v: string): boolean => {
+    if (v === "") return true;
+    if (v.includes(":") || v.includes("#")) return true;
+    if (/^[\[\{\->"' ]/.test(v)) return true;
+    if (v.endsWith(" ")) return true;
+    return false;
+  };
+  
   for (const entry of entries) {
     if (entry.value.kind === "raw") {
       for (let i = 0; i < entry.value.lines.length; i++) {
@@ -159,7 +176,7 @@ export function serializeFrontmatter(entries: PropEntry[]): string {
       out += "\n";
     } else if (entry.value.kind === "scalar") {
       let v = entry.value.value;
-      if (v === "" || v.includes(":") || v.includes("#") || v.startsWith("[") || v.startsWith("{") || v.startsWith(">") || v.startsWith("-") || v.startsWith(" ") || v.endsWith(" ")) {
+      if (needsQuoting(v)) {
         v = `"${v.replace(/"/g, '\\"')}"`;
       }
       out += `${entry.key}: ${v}\n`;
@@ -169,7 +186,11 @@ export function serializeFrontmatter(entries: PropEntry[]): string {
       } else {
         out += `${entry.key}:\n`;
         for (const item of entry.value.items) {
-          out += `  - ${item}\n`;
+          let v = item;
+          if (needsQuoting(v)) {
+            v = `"${v.replace(/"/g, '\\"')}"`;
+          }
+          out += `  - ${v}\n`;
         }
       }
     }

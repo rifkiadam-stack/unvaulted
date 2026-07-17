@@ -39,10 +39,25 @@ describe("frontmatterEdit module", () => {
     expect(roundTrip(text)).toBe(text);
   });
 
-  it("preserves unknown keys as raw, byte-identically", () => {
-    const text = "---\nrelated: [[Some link]]\n  with some indent\n---\n";
+  it("parses simple unknown keys as scalars", () => {
+    const text = "---\ncustom_scalar: hello world\n---\n";
     const parsed = parseFrontmatterBlock(text);
-    expect(parsed).toEqual([{ key: "related", value: { kind: "raw", lines: ["related: [[Some link]]", "  with some indent"] } }]);
+    expect(parsed).toEqual([{ key: "custom_scalar", value: { kind: "scalar", value: "hello world" } }]);
+    expect(roundTrip(text)).toBe(text);
+  });
+
+  it("parses unknown keys as lists if formatted as lists and preserves quotes on round-trip", () => {
+    const text = '---\nrelated:\n  - "[[cs50]]"\n  - "#tag"\n---\n';
+    const parsed = parseFrontmatterBlock(text);
+    expect(parsed).toEqual([{ key: "related", value: { kind: "list", items: ["[[cs50]]", "#tag"] } }]);
+    // the round-trip should re-add the quotes because of special characters (starts with [, contains #)
+    expect(roundTrip(text)).toBe(text);
+  });
+
+  it("preserves genuinely complex keys as raw, byte-identically", () => {
+    const text = "---\nnested:\n  prop: val\n---\n";
+    const parsed = parseFrontmatterBlock(text);
+    expect(parsed).toEqual([{ key: "nested", value: { kind: "raw", lines: ["nested:", "  prop: val"] } }]);
     expect(roundTrip(text)).toBe(text);
   });
   
