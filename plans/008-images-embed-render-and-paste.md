@@ -443,3 +443,14 @@ well-executed.
 
 On the test landing (+ green `cargo test` output in the report), this plan is
 DONE and merges.
+
+### Re-review — 2026-07-17 — verdict PASS
+
+Correction landed in `71c73aa`: `search_embed(base_dir, file_name)` extracted as
+a pure helper (command wraps it + app-data fallback), `#[cfg(test)]` with the
+temp-vault positive case and the not-found negative case — **`cargo test`: 2
+passed**, verified independently. All JS gates green (86/86). **Plan 008
+complete — merging to `main`.** The operator's Obsidian notes now render their
+embedded images, and clipboard paste works everywhere via the central store.
+Next: plan 009 (polish & file types; the RGBA logo now sits in the working tree
+for its Step 3).
