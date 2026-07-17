@@ -66,13 +66,13 @@ body {
 }
 
 .uv-prop-remove:hover {
-  color: var(--uv-text-normal);
+  color: var(--uv-text);
 }
 
 .uv-prop-input {
   background: var(--uv-bg-secondary);
   border: 1px solid var(--uv-border);
-  color: var(--uv-text-normal);
+  color: var(--uv-text);
   padding: 2px 4px;
   border-radius: 4px;
   font-family: inherit;
@@ -103,7 +103,7 @@ body {
 
 .uv-prop-add:hover {
   background: var(--uv-bg-secondary);
-  color: var(--uv-text-normal);
+  color: var(--uv-text);
   border-color: var(--uv-border);
 }
 
