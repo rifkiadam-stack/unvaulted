@@ -21,7 +21,8 @@ live preview, manual save, near-zero chrome.
 | 005 | Obsidian default theme (dark+light, follows OS) | P2 | M | 003 | DONE (PASS — reviewer-confirmed 2026-07-14: side-by-side accepted, click-accuracy + font fixes, 2× 003-hotfix rides) |
 | 006 | NSIS installer + `.md` file association | P2 | S | 001–005, 007 | DONE (PASS — reviewer-confirmed 2026-07-16; 11-item install checklist passed on rebuilt installer; MVP COMPLETE) |
 | 007 | App header: logo + dark/light toggle (dark default) | P2 | S | 005 | DONE (PASS — reviewer-confirmed 2026-07-16; grew to include E1-E3 layout fixes, F2 parse-progress, F4 local images via asset protocol) |
-| 008 | Images: render `![[image]]` embeds (bounded search) + clipboard paste | P2 | M | 007 | TODO (plan written 2026-07-17 — see plans/008-images-embed-render-and-paste.md) |
+| 008 | Images: render `![[image]]` embeds + clipboard paste (central store) | P2 | M | 007 | CHANGES REQUESTED (one item: rust unit test — see plan Review rounds 2+3) |
+| 009 | Polish: cursor past frontmatter, .txt support, transparent icon | P3 | S | 008 | TODO (plan written 2026-07-17) |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (one-line reason) | REJECTED
 (one-line rationale).
@@ -59,8 +60,12 @@ Status values: TODO | IN PROGRESS | DONE | BLOCKED (one-line reason) | REJECTED
 | Candidate | Feature | Origin |
 |-----------|---------|--------|
 | 008 | **Images: embed rendering + clipboard paste.** (a) Render Obsidian `![[image.png]]` embeds — a conscious, image-only reversal of the "embeds inert" decision — resolving the target with a bounded search: note's folder → `attachments/`-like subfolder → walk up parent dirs (≤5 levels, Obsidian saves pasted attachments at the vault root by default; operator's real notes confirmed this) using the F4 asset-protocol machinery; non-image embeds stay inert. (b) Paste an image → save PNG next to the open `.md` (`Pasted image YYYYMMDD-HHMMSS.png`), insert `![](...)`; untitled buffer → prompt to save first; needs a Tauri binary-write command + capability | Operator requests 2026-07-14 (paste) and 2026-07-16 (embed rendering — real notes show inert text where Obsidian shows images) |
-| 009 | **Interactive Properties editor** — Obsidian-like add-property UI, limited key set (`trigger, tags, created, updated, type, title, sources`), Obsidian date formats; supersedes the read-only Properties card | Operator request during 003 smoke (2026-07-07); see plan 003 "Routing" section |
-| 010 | **Orphan asset cleanup** — on save, detect `Pasted image *` files in the central store no longer referenced and prompt to delete | Operator request during 008 paste-redesign discussion (2026-07-17); deferred by operator choice |
+| 010 | **Interactive Properties editor** — Obsidian-like add-property UI, limited key set (`trigger, tags, created, updated, type, title, sources`), Obsidian date formats; supersedes the read-only Properties card | Operator request during 003 smoke (2026-07-07); see plan 003 "Routing" section |
+| 011 | **Orphan asset cleanup** — on save, detect `Pasted image *` files in the central store no longer referenced and prompt to delete | Operator request during 008 paste-redesign discussion (2026-07-17); deferred by operator choice |
+
+(009 became a real plan — polish & file types, see
+plans/009-polish-and-file-types.md — so the backlog candidates shifted to
+010/011.)
 
 (007 became a real plan — app header/theme toggle — so the backlog candidates
 shifted to 008/009.)
