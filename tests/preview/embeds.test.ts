@@ -69,10 +69,12 @@ describe("Embed Resolver", () => {
     expect(called).toBe(false);
   });
 
-  it("renders inert pill and never calls resolver when no basePath is available", () => {
-    let called = false;
-    setEmbedResolverForTests(async () => {
-      called = true;
+  it("renders inert pill and queues resolution even when no basePath is available", async () => {
+    let callCount = 0;
+    setEmbedResolverForTests(async (baseDir, fileName) => {
+      callCount++;
+      expect(baseDir).toBe("");
+      expect(fileName).toBe("pic.png");
       return null;
     });
 
@@ -81,6 +83,6 @@ describe("Embed Resolver", () => {
     
     const inert = decos.filter(d => d.spec.widget !== undefined && d.spec.widget.constructor.name === "InertLinkWidget");
     expect(inert.length).toBe(1);
-    expect(called).toBe(false);
+    expect(callCount).toBe(1);
   });
 });

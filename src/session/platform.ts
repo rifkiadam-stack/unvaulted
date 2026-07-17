@@ -8,7 +8,7 @@ export interface Platform {
   readFile(path: string): Promise<string>;
   saveAtomic(path: string, contents: string): Promise<void>;
   resolveEmbed(baseDir: string, fileName: string): Promise<string | null>;
-  saveBinary(path: string, contentsBase64: string): Promise<void>;
+  savePastedImage(fileName: string, contentsBase64: string): Promise<string>;
   showMessage(text: string): Promise<void>;
   showOpenDialog(): Promise<string | null>;
   showSaveDialog(): Promise<string | null>;
@@ -31,8 +31,8 @@ export function tauriPlatform(): Platform {
     async resolveEmbed(baseDir: string, fileName: string) {
       return invoke<string | null>('resolve_embed', { baseDir, fileName });
     },
-    async saveBinary(path: string, contentsBase64: string) {
-      return invoke('save_binary', { path, contentsBase64 });
+    async savePastedImage(fileName: string, contentsBase64: string) {
+      return invoke<string>('save_pasted_image', { fileName, contentsBase64 });
     },
     async showMessage(text: string) {
       await message(text);

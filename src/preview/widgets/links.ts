@@ -89,7 +89,7 @@ export function buildLinkDecorations(state: EditorState, node: SyntaxNodeRef, de
       const isImage = /\.(png|jpe?g|gif|webp|svg|bmp)$/i.test(text);
       const basePath = state.facet(uvBasePath);
       
-      if (isImage && basePath) {
+      if (isImage) {
         const key = `${basePath}|${text}`;
         const resolved = getResolvedEmbed(key);
         

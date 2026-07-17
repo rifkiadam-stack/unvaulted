@@ -217,11 +217,6 @@ document.addEventListener('paste', async (e) => {
     if (item.type.startsWith('image/')) {
       e.preventDefault();
       
-      if (!session.path) {
-        platform.showMessage("Save the note first to paste images");
-        return;
-      }
-      
       const blob = item.getAsFile();
       if (!blob) continue;
       
@@ -230,10 +225,7 @@ document.addEventListener('paste', async (e) => {
         const base64 = arrayBufferToBase64(buffer);
         const name = pastedImageName(new Date());
         
-        const sep = session.path.includes('\\') ? '\\' : '/';
-        const targetPath = dirOf(session.path) + sep + name;
-        
-        await platform.saveBinary(targetPath, base64);
+        await platform.savePastedImage(name, base64);
         
         const markdown = imageMarkdownFor(name);
         view.dispatch(view.state.replaceSelection(markdown));

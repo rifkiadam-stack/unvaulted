@@ -105,5 +105,5 @@ export function pastedImageName(now: Date): string {
 }
 
 export function imageMarkdownFor(name: string): string {
-  return `![](${name.replace(/ /g, '%20')})`;
+  return `![[${name}]]`;
 }

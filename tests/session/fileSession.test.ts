@@ -103,7 +103,7 @@ describe('fileSession pure module', () => {
     
     it("encodes spaces for markdown but preserves rest", () => {
       expect(imageMarkdownFor("Pasted image 20260717-090502.png"))
-        .toBe("![](Pasted%20image%2020260717-090502.png)");
+        .toBe("![[Pasted image 20260717-090502.png]]");
     });
   });
 });
