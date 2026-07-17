@@ -107,3 +107,17 @@ export function pastedImageName(now: Date): string {
 export function imageMarkdownFor(name: string): string {
   return `![[${name}]]`;
 }
+
+export function frontmatterEndOffset(text: string): number {
+  const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?/);
+  if (match) {
+    return match[0].length;
+  }
+  
+  const eofMatch = text.match(/^---\r?\n([\s\S]*?)\r?\n---$/);
+  if (eofMatch) {
+    return eofMatch[0].length;
+  }
+  
+  return 0;
+}

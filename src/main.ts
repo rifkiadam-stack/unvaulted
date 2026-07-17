@@ -16,7 +16,8 @@ import {
   SessionState,
   dirOf,
   pastedImageName,
-  imageMarkdownFor
+  imageMarkdownFor,
+  frontmatterEndOffset
 } from "./session/fileSession";
 
 import { Compartment } from "@codemirror/state";
@@ -109,9 +110,11 @@ async function loadPath(path: string) {
   try {
     const text = await platform.readFile(path);
     const newState = loadFile(path, text);
+    const endOffset = frontmatterEndOffset(newState.currentText);
     
     view.dispatch({
       changes: { from: 0, to: view.state.doc.length, insert: newState.currentText },
+      selection: { anchor: endOffset, head: endOffset },
       effects: baseCompartment.reconfigure(uvBasePath.of(dirOf(path)))
     });
     

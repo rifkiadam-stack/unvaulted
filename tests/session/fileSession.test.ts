@@ -11,7 +11,8 @@ import {
   inlineTitle,
   dirOf,
   pastedImageName,
-  imageMarkdownFor
+  imageMarkdownFor,
+  frontmatterEndOffset
 } from '../../src/session/fileSession';
 
 describe('fileSession pure module', () => {
@@ -104,6 +105,28 @@ describe('fileSession pure module', () => {
     it("encodes spaces for markdown but preserves rest", () => {
       expect(imageMarkdownFor("Pasted image 20260717-090502.png"))
         .toBe("![[Pasted image 20260717-090502.png]]");
+    });
+  });
+
+  describe("frontmatterEndOffset", () => {
+    it("doc with frontmatter -> offset of body start", () => {
+      const text = "---\ntitle: test\n---\nBody starts here";
+      expect(frontmatterEndOffset(text)).toBe(20);
+    });
+
+    it("no frontmatter -> 0", () => {
+      const text = "Just some text without frontmatter";
+      expect(frontmatterEndOffset(text)).toBe(0);
+    });
+
+    it("unterminated fence -> 0", () => {
+      const text = "---\ntitle: test\nBody starts here without closing fence";
+      expect(frontmatterEndOffset(text)).toBe(0);
+    });
+
+    it("frontmatter only (no body) -> end of doc", () => {
+      const text = "---\ntitle: test\n---";
+      expect(frontmatterEndOffset(text)).toBe(19);
     });
   });
 });
