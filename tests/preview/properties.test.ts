@@ -15,6 +15,7 @@ function createMockNode(tagName = "div") {
     textContent: "",
     title: "",
     value: "",
+    style: {},
     parentElement: null,
     appendChild: (n: any) => {
       if (n) {
@@ -126,5 +127,30 @@ describe("Properties widget", () => {
     
     const widgets = decos.filter(d => d.spec.widget !== undefined && d.spec.widget.constructor.name === "PropertiesWidget");
     expect(widgets.length).toBe(0);
+  });
+
+  it("filters existing keys out of the add property dropdown", () => {
+    (globalThis as any).document = { createElement: (tag: string) => createMockNode(tag) };
+    const yaml = "---\ntitle: Hello\ntags: [a, b]\ntrigger: a\ncreated: a\nupdated: a\ntype: a\nsources: a\n---";
+    const state = createPreviewState(yaml + "\n\n" + "x".repeat(100), { anchor: 100 });
+    const widget = decorationsOf(state)[0].spec.widget as any;
+    
+    const dom = widget.toDOM({ state, dispatch: vi.fn() } as any);
+    
+    const emptyMenu = dom.querySelectorAll(".uv-prop-menu-empty");
+    expect(emptyMenu.length).toBe(1); // all ALLOWED_KEYS are used
+  });
+
+  it("shows remaining keys in the add property dropdown", () => {
+    (globalThis as any).document = { createElement: (tag: string) => createMockNode(tag) };
+    const yaml = "---\ntags: [a, b]\n---";
+    const state = createPreviewState(yaml + "\n\n" + "x".repeat(100), { anchor: 100 });
+    const widget = decorationsOf(state)[0].spec.widget as any;
+    
+    const dom = widget.toDOM({ state, dispatch: vi.fn() } as any);
+    
+    const menuItems = dom.querySelectorAll(".uv-prop-menu-item");
+    // ALLOWED_KEYS has 7 items, "tags" is used, so 6 remaining
+    expect(menuItems.length).toBe(6);
   });
 });

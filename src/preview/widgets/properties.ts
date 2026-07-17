@@ -2,8 +2,10 @@ import { EditorState, Range } from "@codemirror/state";
 import { EditorView, Decoration, WidgetType } from "@codemirror/view";
 import { SyntaxNodeRef } from "@lezer/common";
 import { isRevealed } from "../reveal";
-import { parseFrontmatterBlock, serializeFrontmatter, setProp, removeProp } from "../../session/frontmatterEdit";
+import { parseFrontmatterBlock, serializeFrontmatter, setProp, removeProp, ALLOWED_KEYS, addProp } from "../../session/frontmatterEdit";
 import { frontmatterEndOffset } from "../../session/fileSession";
+
+let pendingFocusKey: string | null = null;
 
 class PropertiesWidget extends WidgetType {
   constructor(readonly text: string, readonly from: number) {
@@ -133,7 +135,62 @@ class PropertiesWidget extends WidgetType {
         valContainer.replaceChild(input, valDisplay);
         input.focus();
       };
+
+      if (pendingFocusKey === entry.key) {
+        pendingFocusKey = null;
+        setTimeout(() => {
+          valDisplay.onclick!({ stopPropagation: () => {} } as any);
+        }, 0);
+      }
     }
+    
+    // Add property footer
+    const existingKeys = new Set(entries.map(e => e.key));
+    const availableKeys = ALLOWED_KEYS.filter(k => !existingKeys.has(k));
+    
+    const footer = document.createElement("div");
+    footer.className = "uv-prop-footer";
+    
+    const addBtn = document.createElement("button");
+    addBtn.className = "uv-prop-add";
+    addBtn.textContent = "+ Add property";
+    
+    const menu = document.createElement("div");
+    menu.className = "uv-prop-add-menu";
+    menu.style.display = "none";
+    
+    if (availableKeys.length === 0) {
+      const emptyItem = document.createElement("div");
+      emptyItem.className = "uv-prop-menu-item uv-prop-menu-empty";
+      emptyItem.textContent = "no more properties";
+      menu.appendChild(emptyItem);
+    } else {
+      for (const k of availableKeys) {
+        const item = document.createElement("div");
+        item.className = "uv-prop-menu-item";
+        item.textContent = k;
+        item.onclick = (e) => {
+          e.stopPropagation();
+          pendingFocusKey = k;
+          const updated = addProp(entries, k);
+          const newText = serializeFrontmatter(updated);
+          const offset = frontmatterEndOffset(view.state.doc.toString());
+          view.dispatch({
+            changes: { from: 0, to: offset, insert: newText }
+          });
+        };
+        menu.appendChild(item);
+      }
+    }
+    
+    addBtn.onclick = (e) => {
+      e.stopPropagation();
+      menu.style.display = menu.style.display === "none" ? "block" : "none";
+    };
+    
+    footer.appendChild(addBtn);
+    footer.appendChild(menu);
+    div.appendChild(footer);
     
     return div;
   }

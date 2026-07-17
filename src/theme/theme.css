@@ -85,6 +85,64 @@ body {
   border-color: var(--uv-accent);
 }
 
+.uv-prop-footer {
+  margin-top: 8px;
+  position: relative;
+}
+
+.uv-prop-add {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--uv-text-muted);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.9em;
+  transition: all 0.2s;
+}
+
+.uv-prop-add:hover {
+  background: var(--uv-bg-secondary);
+  color: var(--uv-text-normal);
+  border-color: var(--uv-border);
+}
+
+.uv-prop-add-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 4px;
+  background: var(--uv-bg-primary);
+  border: 1px solid var(--uv-border);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 100;
+  min-width: 150px;
+  padding: 4px;
+}
+
+.uv-prop-menu-item {
+  padding: 6px 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  color: var(--uv-text-normal);
+}
+
+.uv-prop-menu-item:hover {
+  background: var(--uv-accent);
+  color: white;
+}
+
+.uv-prop-menu-empty {
+  color: var(--uv-text-muted);
+  font-style: italic;
+  cursor: default;
+}
+.uv-prop-menu-empty:hover {
+  background: transparent;
+  color: var(--uv-text-muted);
+}
+
 /* App Header */
 .uv-app-header {
   display: flex;
