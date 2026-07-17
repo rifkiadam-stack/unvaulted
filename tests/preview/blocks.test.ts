@@ -77,6 +77,8 @@ describe("Block basics", () => {
     expect(resolveImageSrc("pic%20space.png", "C:\\notes")).toBe("C:\\notes\\pic space.png");
     expect(resolveImageSrc("https://remote.com/img.png", "C:\\notes")).toBe("https://remote.com/img.png");
     expect(resolveImageSrc("pic.png", "/home/user/notes")).toBe("/home/user/notes/pic.png");
+    expect(resolveImageSrc("C:\\vault\\pic.png", "C:\\notes\\sub")).toBe("C:\\vault\\pic.png");
+    expect(resolveImageSrc("/tmp/pic.png", "/home/user")).toBe("/tmp/pic.png");
   });
 
   it("reveals block image when cursor touches line", () => {

@@ -15,6 +15,10 @@ export function resolveImageSrc(url: string, basePath: string): string {
     return rawUrl;
   }
   
+  if (/^[a-zA-Z]:[\\/]/.test(rawUrl) || rawUrl.startsWith("\\\\") || rawUrl.startsWith("/")) {
+    return rawUrl;
+  }
+  
   let joined = rawUrl;
   if (basePath) {
     const sep = basePath.includes('\\') ? '\\' : '/';
