@@ -185,7 +185,62 @@ class PropertiesWidget extends WidgetType {
     
     addBtn.onclick = (e) => {
       e.stopPropagation();
-      menu.style.display = menu.style.display === "none" ? "block" : "none";
+      if (menu.style.display === "block") {
+        menu.style.display = "none";
+        return;
+      }
+      menu.style.display = "block";
+      
+      const rect = addBtn.getBoundingClientRect();
+      menu.style.position = "fixed";
+      menu.style.left = `${rect.left}px`;
+      
+      const viewportHeight = typeof window !== 'undefined' ? (window.innerHeight || 768) : 768;
+      const spaceBelow = viewportHeight - rect.bottom;
+      
+      if (spaceBelow < 200) {
+        menu.style.top = "auto";
+        menu.style.bottom = `${viewportHeight - rect.top}px`;
+      } else {
+        menu.style.top = `${rect.bottom}px`;
+        menu.style.bottom = "auto";
+      }
+      menu.style.maxHeight = "200px";
+      menu.style.overflowY = "auto";
+      
+      const closeMenu = () => {
+        menu.style.display = "none";
+        if (typeof document !== 'undefined') {
+          document.removeEventListener("mousedown", onDocClick);
+          document.removeEventListener("keydown", onKeyDown);
+        }
+        if (typeof window !== 'undefined') {
+          window.removeEventListener("scroll", closeMenu, true);
+          window.removeEventListener("resize", closeMenu);
+        }
+      };
+      
+      const onDocClick = (ev: MouseEvent) => {
+        if (!menu.contains(ev.target as Node) && ev.target !== addBtn) {
+          closeMenu();
+        }
+      };
+      
+      const onKeyDown = (ev: KeyboardEvent) => {
+        if (ev.key === "Escape") {
+          ev.preventDefault();
+          closeMenu();
+        }
+      };
+      
+      if (typeof document !== 'undefined') {
+        document.addEventListener("mousedown", onDocClick);
+        document.addEventListener("keydown", onKeyDown);
+      }
+      if (typeof window !== 'undefined') {
+        window.addEventListener("scroll", closeMenu, true);
+        window.addEventListener("resize", closeMenu);
+      }
     };
     
     footer.appendChild(addBtn);
