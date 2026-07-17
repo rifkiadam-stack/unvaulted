@@ -62,6 +62,32 @@ fn resolve_embed(base_dir: String, file_name: String) -> Option<String> {
             return attachment_path.to_str().map(|s| s.to_string());
         }
         
+        let obsidian_dir = current_dir.join(".obsidian");
+        if obsidian_dir.is_dir() {
+            let app_json_path = obsidian_dir.join("app.json");
+            if let Ok(contents) = std::fs::read_to_string(&app_json_path) {
+                if let Ok(json) = serde_json::from_str::<serde_json::Value>(&contents) {
+                    if let Some(att_folder) = json.get("attachmentFolderPath").and_then(|v| v.as_str()) {
+                        let candidate = if att_folder == "./" {
+                            None
+                        } else if att_folder.starts_with("./") {
+                            let sub = &att_folder[2..];
+                            Some(Path::new(&base_dir).join(sub).join(&file_name))
+                        } else {
+                            Some(current_dir.join(att_folder).join(&file_name))
+                        };
+                        
+                        if let Some(c) = candidate {
+                            if c.is_file() {
+                                return c.to_str().map(|s| s.to_string());
+                            }
+                        }
+                    }
+                }
+            }
+            break;
+        }
+        
         if let Some(parent) = current_dir.parent() {
             current_dir = parent;
         } else {
@@ -121,6 +147,4 @@ pub fn run() {
       Ok(())
     })
     .invoke_handler(tauri::generate_handler![get_open_path, save_atomic, read_file, resolve_embed, save_binary])
-    .run(tauri::generate_context!())
-    .expect("error while running tauri application");
-}
+
