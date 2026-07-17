@@ -40,16 +40,33 @@ export function tauriPlatform(): Platform {
     async showOpenDialog() {
       const selected = await open({
         multiple: false,
-        filters: [{ name: 'Markdown', extensions: ['md', 'markdown'] }]
+        filters: [{
+          name: 'Markdown',
+          extensions: ['md', 'markdown']
+        }, {
+          name: 'Text',
+          extensions: ['txt']
+        }, {
+          name: 'All Files',
+          extensions: ['*']
+        }]
       });
       if (selected === null) return null;
       return Array.isArray(selected) ? selected[0] : selected;
     },
     async showSaveDialog() {
-      const selected = await save({
-        filters: [{ name: 'Markdown', extensions: ['md', 'markdown'] }]
+      return save({
+        filters: [{
+          name: 'Markdown',
+          extensions: ['md', 'markdown']
+        }, {
+          name: 'Text',
+          extensions: ['txt']
+        }, {
+          name: 'All Files',
+          extensions: ['*']
+        }]
       });
-      return selected;
     },
     async confirmClose(fileName: string): Promise<'save' | 'discard' | 'cancel'> {
       return new Promise((resolve) => {

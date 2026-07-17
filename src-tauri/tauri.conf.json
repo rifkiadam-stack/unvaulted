@@ -48,6 +48,12 @@
         "name": "Markdown",
         "description": "Markdown document",
         "role": "Editor"
+      },
+      {
+        "ext": ["txt"],
+        "name": "Text",
+        "description": "Text document",
+        "role": "Editor"
       }
     ],
     "windows": {

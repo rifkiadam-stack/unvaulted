@@ -2,7 +2,7 @@
 fn get_open_path() -> Option<String> {
     if let Some(arg) = std::env::args().nth(1) {
         let arg_lower = arg.to_lowercase();
-        if (arg_lower.ends_with(".md") || arg_lower.ends_with(".markdown")) && std::path::Path::new(&arg).exists() {
+        if (arg_lower.ends_with(".md") || arg_lower.ends_with(".markdown") || arg_lower.ends_with(".txt")) && std::path::Path::new(&arg).exists() {
             return Some(arg);
         }
     }
