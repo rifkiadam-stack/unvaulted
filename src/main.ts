@@ -25,7 +25,7 @@ import {
 import { Compartment, Extension, Prec } from "@codemirror/state";
 import { uvBasePath } from "./preview/widgets/image";
 import { setEmbedDispatch } from "./preview/embedResolver";
-import { installContextMenu } from "./ui/menus";
+import { installContextMenu, showMenu } from "./ui/menus";
 import { initialMode, nextMode, ThemeMode } from "./theme/themeMode";
 
 let session = emptySession();
@@ -43,6 +43,20 @@ appDiv.style.height = '100vh';
 
 const headerRow = document.createElement('div');
 headerRow.className = 'uv-app-header';
+
+const fileBtn = document.createElement('button');
+fileBtn.className = 'uv-file-btn';
+fileBtn.textContent = 'File';
+fileBtn.onclick = (e) => {
+  e.stopPropagation();
+  const rect = fileBtn.getBoundingClientRect();
+  showMenu([
+    { label: "Open", hint: "Ctrl+O", action: doOpen },
+    { label: "Save", hint: "Ctrl+S", action: () => doSave(false) },
+    { label: "Save As", hint: "Ctrl+Shift+S", action: () => doSave(true) }
+  ], rect.left, rect.bottom + 4);
+};
+headerRow.appendChild(fileBtn);
 
 const themeToggle = document.createElement('button');
 themeToggle.className = 'uv-theme-toggle';

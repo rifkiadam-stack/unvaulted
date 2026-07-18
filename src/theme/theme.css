@@ -173,7 +173,7 @@ body {
 /* App Header */
 .uv-app-header {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
   height: 40px;
   padding: 0 0.75rem;
@@ -333,6 +333,21 @@ body {
   padding: 0.4em 0.8em;
 }
 .uv-table th {
+  background-color: var(--uv-bg-secondary);
+}
+
+.uv-file-btn {
+  background: transparent;
+  border: none;
+  appearance: none;
+  color: var(--uv-text-muted);
+  font-family: inherit;
+  font-size: 0.9em;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.uv-file-btn:hover {
   background-color: var(--uv-bg-secondary);
 }
 
