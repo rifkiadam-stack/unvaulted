@@ -51,6 +51,9 @@ export function tauriPlatform(): Platform {
       const selected = await open({
         multiple: false,
         filters: [{
+          name: 'All supported',
+          extensions: ['md', 'markdown', 'txt']
+        }, {
           name: 'Markdown',
           extensions: ['md', 'markdown']
         }, {
