@@ -1,0 +1,56 @@
+name: AI PR Reviewer (Claude Code + DeepSeek)
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+  issue_comment:
+    types: [created]
+
+jobs:
+  review-code:
+    if: >
+      github.event_name == 'pull_request' || 
+      (github.event_name == 'issue_comment' && github.event.issue.pull_request && contains(github.event.comment.body, '@claude') && github.actor == 'rifkiadam-stack')
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: ⚙️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 🤖 Analisis & Balas PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ANTHROPIC_BASE_URL: https://api.deepseek.com/anthropic
+          ANTHROPIC_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          # PERBAIKAN: Tangkap teks komentar di environment variable agar aman dari karakter kutip
+          COMMENT_BODY: ${{ github.event.comment.body }}
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            PR_NUMBER="${{ github.event.pull_request.number }}"
+            USER_PROMPT="Tolong review perubahan kode pada Pull Request ini. Berikan komentar singkat jika ada bug, kode tidak efisien, atau berikan pujian 'LGTM' jika kodenya sudah sempurna."
+          else
+            PR_NUMBER="${{ github.event.issue.number }}"
+            USER_PROMPT="Seseorang menyebutmu di Pull Request dengan instruksi: '${COMMENT_BODY}'. Tolong jalankan instruksi tersebut berdasarkan perubahan kode ini."
+          fi
+          
+          echo "Membuat file instruksi untuk AI..."
+          echo "$USER_PROMPT" > instruksi.txt
+          echo "Berikut adalah perubahan kodenya:" >> instruksi.txt
+          gh pr diff $PR_NUMBER >> instruksi.txt
+          
+          echo "Menjalankan Claude Code (bertenaga DeepSeek)..."
+          npx -y @anthropic-ai/claude-code "Tolong baca file instruksi.txt dan jawab sesuai instruksi. Keluarkan hasil analisismu dalam format Markdown yang rapi, tanpa teks pengantar." > ai_response.txt
+          
+          echo "Membalas ke GitHub PR..."
+          gh pr comment $PR_NUMBER -F ai_response.txt
