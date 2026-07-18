@@ -17,7 +17,8 @@ import {
   dirOf,
   pastedImageName,
   imageMarkdownFor,
-  frontmatterEndOffset
+  frontmatterEndOffset,
+  droppedPastedImages
 } from "./session/fileSession";
 
 import { Compartment } from "@codemirror/state";
@@ -137,10 +138,75 @@ async function doSave(): Promise<boolean> {
   
   try {
     const textToSave = serializeForSave(session);
+    const dropped = droppedPastedImages(session.loadedText, session.currentText);
+    
     await platform.saveAtomic(targetPath, textToSave);
     const newState = afterSave(session);
     newState.path = targetPath; // in case it was untitled
     await updateState(newState);
+    
+    if (dropped.length > 0) {
+      await new Promise<void>((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.className = 'uv-modal-overlay';
+        overlay.style.position = 'fixed';
+        overlay.style.top = '0';
+        overlay.style.left = '0';
+        overlay.style.width = '100vw';
+        overlay.style.height = '100vh';
+        overlay.style.backgroundColor = 'rgba(0,0,0,0.5)';
+        overlay.style.display = 'flex';
+        overlay.style.alignItems = 'center';
+        overlay.style.justifyContent = 'center';
+        overlay.style.zIndex = '9999';
+
+        const modal = document.createElement('div');
+        modal.className = 'uv-modal';
+        modal.style.backgroundColor = 'var(--bg-color, #fff)';
+        modal.style.color = 'var(--text-color, #000)';
+        modal.style.padding = '20px';
+        modal.style.borderRadius = '8px';
+        modal.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+        modal.style.maxWidth = '400px';
+        modal.style.fontFamily = 'system-ui, sans-serif';
+
+        const text = document.createElement('p');
+        text.innerText = `Removed image reference(s):\n${dropped.join('\n')}\n\nAlso delete these files from the asset store?`;
+        text.style.margin = '0 0 20px 0';
+        text.style.whiteSpace = 'pre-wrap';
+        modal.appendChild(text);
+
+        const btnContainer = document.createElement('div');
+        btnContainer.style.display = 'flex';
+        btnContainer.style.justifyContent = 'flex-end';
+        btnContainer.style.gap = '10px';
+
+        const yesBtn = document.createElement('button');
+        yesBtn.textContent = 'Yes';
+        const noBtn = document.createElement('button');
+        noBtn.textContent = 'No';
+
+        const close = async (confirmed: boolean) => {
+          document.body.removeChild(overlay);
+          if (confirmed) {
+            await platform.deletePastedImages(dropped);
+          }
+          resolve();
+        };
+
+        yesBtn.onclick = () => close(true);
+        noBtn.onclick = () => close(false);
+
+        btnContainer.appendChild(yesBtn);
+        btnContainer.appendChild(noBtn);
+        modal.appendChild(btnContainer);
+        overlay.appendChild(modal);
+
+        document.body.appendChild(overlay);
+        yesBtn.focus();
+      });
+    }
+    
     return true;
   } catch (e) {
     console.error("Failed to save", e);
