@@ -26,7 +26,7 @@ live preview, manual save, near-zero chrome.
 | 010 | Interactive Properties editor (free-text keys, dates, auto-spawn) | P2 | M/L | 009 | DONE (PASS — reviewer-confirmed 2026-07-18 after 5 correction rounds; operator smoke green; root-caused stale preview.css skin) |
 | 011 | Orphan cleanup + relocate store to Pictures\Unvaulted | P3 | S | 010 | DONE (PASS — reviewer-confirmed 2026-07-18; operator smoke all green; v0.1.0 SHIPPED) |
 | 012 | Plain-text mode: `.txt` renders literal, markdown only for `.md`/`.markdown` | P2 | S/M | 011 | DONE (PASS — reviewer-confirmed 2026-07-18; operator smoke green) |
-| 013 | Combined open-dialog filter + wider non-default "Open with" (json/csv/log/xml/yml/yaml/ini) | P3 | S | 012 | TODO (plan written 2026-07-18) |
+| 013 | Combined open-dialog filter + wider non-default "Open with" (json/csv/log/xml/yml/yaml/ini) | P3 | S | 012 | DONE (PASS — reviewer-confirmed 2026-07-18; association smoke at release install) |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (one-line reason) | REJECTED
 (one-line rationale).

@@ -121,6 +121,15 @@ Ketik `---` di **baris pertama** file → blok Properties otomatis terbentuk dan
 - Kalau kamu **menghapus** referensi `![[Pasted image ...]]` lalu menyimpan, Unvaulted menawarkan ikut menghapus file gambarnya — biar tidak ada file yatim menumpuk. Pilih *No* kalau masih dipakai file lain.
 - Gambar `![alt](path-atau-url)` standar juga didukung.
 
+## File `.txt` dan format teks lain
+
+Unvaulted membedakan dua mode secara otomatis dari ekstensi file:
+
+- **`.md` / `.markdown`** → mode markdown penuh: semua gaya di panduan ini aktif.
+- **Ekstensi lain** (`.txt`, `.json`, `.csv`, `.log`, dll) → **mode polos ala Notepad**: teks tampil persis apa adanya — `---` tetap tiga strip, `**` tetap dua bintang, dan tidak ada kartu Properties. Isi file tidak pernah diubah bentuknya.
+
+Dialog Open (`Ctrl+O`) langsung menampilkan semua file yang didukung (`.md`, `.markdown`, `.txt`); pilih "All Files" untuk membuka format teks lain — atau cukup seret filenya ke jendela. Unvaulted juga muncul di klik-kanan → *Open with* untuk format teks umum, tanpa pernah mengambil alih aplikasi default-mu.
+
 ## Yang sengaja "mati"
 
 Unvaulted untuk file **berdiri sendiri** — tanpa vault. Maka sintaks yang butuh vault tetap dirender *cantik*, tapi tidak berbuat apa-apa:

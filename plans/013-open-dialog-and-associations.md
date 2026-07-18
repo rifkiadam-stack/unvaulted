@@ -198,3 +198,20 @@ UNCHANGED) is verified by the operator after the next release install.
 - Reviewer: after merge, update `docs/PANDUAN-UNVAULTED.md` (open-dialog
   behavior + "file lain seperti json tampil apa adanya") and rebuild the
   installer + refresh `installer/`.
+
+## Review — 2026-07-18
+
+**Verdict: PASS.**
+
+Reviewed `main..feat/013-open-filters` (3 commits, one per step). Verified
+independently: gates green (typecheck, 114/114, build, `cargo check`); diff
+is exactly the three data changes — "All supported" filter prepended (open
+dialog only, save dialog untouched), Rust whitelist as a readable const
+slice covering all ten extensions (case-insensitive + exists() preserved),
+one new fileAssociations entry with `"role": "Editor"`. Both locked
+decisions honored. Install-level association behavior (right-click a
+`.json` → Open with lists Unvaulted; default handler unchanged) is verified
+by the operator after the release install.
+
+**Plan 013 complete — merging to `main`.** Release: docs note + installer
+rebuild + `installer/` refresh follow immediately.
