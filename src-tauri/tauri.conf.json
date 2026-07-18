@@ -57,7 +57,7 @@
       }
     ],
     "windows": {
-      "nsis": { "installMode": "currentUser" }
+      "nsis": { "installMode": "both" }
     },
     "android": {
       "debugApplicationIdSuffix": ".debug"
