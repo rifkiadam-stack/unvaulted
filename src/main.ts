@@ -22,7 +22,7 @@ import {
   isMarkdownPath
 } from "./session/fileSession";
 
-import { Compartment } from "@codemirror/state";
+import { Extension, Prec, Compartment } from "@codemirror/state";
 import { uvBasePath } from "./preview/widgets/image";
 import { setEmbedDispatch } from "./preview/embedResolver";
 import { initialMode, nextMode, ThemeMode } from "./theme/themeMode";
@@ -135,9 +135,9 @@ async function loadPath(path: string) {
   }
 }
 
-async function doSave(): Promise<boolean> {
+async function doSave(forceDialog: boolean = false): Promise<boolean> {
   let targetPath = session.path;
-  if (!targetPath) {
+  if (!targetPath || forceDialog) {
     const picked = await platform.showSaveDialog();
     if (picked) {
       targetPath = picked;
@@ -259,6 +259,13 @@ document.addEventListener('keydown', (e) => {
       case 'w':
         e.preventDefault();
         getCurrentWindow().close();
+        break;
+    }
+  } else if (isMod && e.shiftKey && !e.altKey) {
+    switch (e.key.toLowerCase()) {
+      case 's':
+        e.preventDefault();
+        doSave(true);
         break;
     }
   }
