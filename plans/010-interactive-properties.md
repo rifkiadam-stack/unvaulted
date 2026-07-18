@@ -406,3 +406,43 @@ another row → input opens and can be filled;
 (3) add `tags`, type `a, b` → cursor-reveal shows proper `- a` / `- b`
 list lines;
 (4) raw/complex row still visible read-only.
+
+## Corrections — round 4 (review of round 3, 2026-07-17)
+
+Round 3 reviewed: gates independently re-run green (108/108), C9/C11/C12
+verified correct in the diff. ONE real defect in the C10 implementation
+plus one hygiene item. Reviewer verdict: CHANGES REQUESTED.
+
+### C13 — BUG: stale `pendingFocusKey` reopens inputs by itself
+
+`valDisplay.onmousedown` sets `pendingFocusKey = entry.key` on EVERY click,
+but the flag is only cleared in `toDOM`'s auto-open branch. The direct
+click path (no rebuild) never clears it. Consequences:
+
+- Click a value → edit → press Enter → commit dispatch → rebuild →
+  `toDOM` sees the stale flag → the input REOPENS immediately after Enter
+  instead of showing the committed value.
+- Click a value → Escape (cancel) → the flag survives → the NEXT
+  frontmatter rebuild (editing another row, removing a row) silently
+  auto-opens that old row's input — a ghost editor.
+
+Fix (one line, plus symmetry): clear the flag once the direct open
+succeeds — in `valDisplay.onclick`, set `pendingFocusKey = null` right
+after swapping the input in. The mousedown→blur→rebuild rescue path still
+works because in THAT sequence the click handler never runs (the node is
+already destroyed when the rebuild happens before click).
+
+Manual verify: edit `title`, press Enter → input CLOSES and shows the
+value; then edit another row → no ghost input opens elsewhere.
+
+### C14 — Hygiene (same commit is fine): placeholder + duplicate CSS rule
+
+- The muted-italic `Empty` span is built via `innerHTML` with inline
+  styles in THREE places in properties.ts. Extract a tiny helper that
+  creates a `<span class="uv-prop-empty">Empty</span>` and add the class
+  to theme.css (color `--uv-text-muted`, font-style italic).
+- theme.css now defines `.uv-property-value` TWICE (new block near the
+  top, original in the Properties section). Merge them into the original
+  single rule (keep `min-height: 1.4em`; the `gap` stays `0.3em`).
+
+**Verify**: gates green; the two manual checks under C13.
