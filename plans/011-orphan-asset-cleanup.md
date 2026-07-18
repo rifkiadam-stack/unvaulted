@@ -141,3 +141,33 @@ save with no removals → no prompt.
   seam to upgrade from per-file to global orphan detection.
 - Reviewer should scrutinize: the name-pattern validation on BOTH sides
   (JS extraction + Rust deletion) and the save-before-prompt ordering.
+
+## Review — 2026-07-18
+
+**Verdict: PASS.**
+
+Reviewed `main..feat/011-cleanup` (4 commits, one per step). Independently
+verified: gates green (typecheck, **113/113 JS tests**, build, **cargo test
+3/3** — `test_is_pasted_image_name` genuinely present and covering
+traversal); Step 0 fallback chain exactly as specified (`picture_dir()/
+Unvaulted` with `create_dir_all` → `home_dir()/Pictures/Unvaulted` →
+legacy `app_data_dir()/assets`), store-first-then-legacy probing in both
+`resolve_embed` and `delete_pasted_image`, no file migration; strict name
+validation on both sides with tests; `dropped` computed BEFORE the save,
+modal strictly AFTER `saveAtomic`+`afterSave` (STOP condition honored);
+delete errors log-only, never block a completed save. Scope clean — 5
+files, every hunk traced to a step; the confirm modal reuses the
+plan-004 `uv-modal` skin.
+
+Non-blocking notes for the record: `is_pasted_image_name` indexes a
+`chars` vec (could panic on exotic multibyte names — unreachable via the
+ASCII-only JS regex that is its sole caller); the modal copies the
+plan-004 inline-style wart (`--bg-color`/`--text-color`) already
+neutralized by theme.css's `!important` overrides.
+
+Operator smoke 2026-07-18: all five checks confirmed no-issue (paste →
+`Pictures\Unvaulted` auto-created; legacy-store note still renders;
+Yes deletes; No keeps; ordinary saves show no prompt).
+
+**Plan 011 complete — merging to `main`. All planned work is done; next
+step is the final release build.**
