@@ -44,6 +44,15 @@ body {
   padding: 0;
 }
 
+.uv-property-value {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+  min-height: 1.4em;
+}
+
 .uv-property-value-container {
   display: flex;
   align-items: center;

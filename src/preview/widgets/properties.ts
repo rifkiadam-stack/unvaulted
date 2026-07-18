@@ -60,15 +60,23 @@ class PropertiesWidget extends WidgetType {
       
       let currentValueStr = "";
       if (entry.value.kind === "scalar") {
-        valDisplay.textContent = entry.value.value;
         currentValueStr = entry.value.value;
+        if (currentValueStr === "") {
+          valDisplay.innerHTML = `<span style="color: var(--uv-text-muted); font-style: italic;">Empty</span>`;
+        } else {
+          valDisplay.textContent = entry.value.value;
+        }
       } else if (entry.value.kind === "list") {
         currentValueStr = entry.value.items.join(", ");
-        for (const item of entry.value.items) {
-          const chip = document.createElement("span");
-          chip.className = "uv-property-chip";
-          chip.textContent = item;
-          valDisplay.appendChild(chip);
+        if (entry.value.items.length === 0) {
+          valDisplay.innerHTML = `<span style="color: var(--uv-text-muted); font-style: italic;">Empty</span>`;
+        } else {
+          for (const item of entry.value.items) {
+            const chip = document.createElement("span");
+            chip.className = "uv-property-chip";
+            chip.textContent = item;
+            valDisplay.appendChild(chip);
+          }
         }
       }
       
@@ -93,6 +101,10 @@ class PropertiesWidget extends WidgetType {
       div.appendChild(row);
 
       // Editable behavior
+      valDisplay.onmousedown = () => {
+        pendingFocusKey = entry.key;
+      };
+      
       valDisplay.onclick = (e) => {
         e.stopPropagation();
         const input = document.createElement("input");
@@ -110,10 +122,40 @@ class PropertiesWidget extends WidgetType {
           }
           const updated = setProp(entries, entry.key, v as any);
           const newText = serializeFrontmatter(updated);
-          const offset = frontmatterEndOffset(view.state.doc.toString());
-          view.dispatch({
-            changes: { from: 0, to: offset, insert: newText }
-          });
+          
+          // C9: Restore the DOM row manually before dispatching
+          if (entry.value.kind === "scalar") {
+            currentValueStr = newVal;
+            if (newVal === "") {
+              valDisplay.innerHTML = `<span style="color: var(--uv-text-muted); font-style: italic;">Empty</span>`;
+            } else {
+              valDisplay.textContent = newVal;
+            }
+          } else {
+            currentValueStr = (v as any).items.join(", ");
+            valDisplay.innerHTML = "";
+            if ((v as any).items.length === 0) {
+              valDisplay.innerHTML = `<span style="color: var(--uv-text-muted); font-style: italic;">Empty</span>`;
+            } else {
+              for (const item of (v as any).items) {
+                const chip = document.createElement("span");
+                chip.className = "uv-property-chip";
+                chip.textContent = item;
+                valDisplay.appendChild(chip);
+              }
+            }
+          }
+          valContainer.replaceChild(valDisplay, input);
+
+          const currentDocText = view.state.doc.toString();
+          const offset = frontmatterEndOffset(currentDocText);
+          const currentFrontmatter = currentDocText.slice(0, offset);
+
+          if (newText !== currentFrontmatter) {
+            view.dispatch({
+              changes: { from: 0, to: offset, insert: newText }
+            });
+          }
         };
         
         const cancel = () => {
