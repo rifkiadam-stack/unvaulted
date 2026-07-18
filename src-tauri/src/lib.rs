@@ -87,6 +87,34 @@ fn search_embed(base_dir: &std::path::Path, file_name: &str) -> Option<std::path
     None
 }
 
+fn asset_store_dir(app: &tauri::AppHandle) -> Result<std::path::PathBuf, String> {
+    use tauri::Manager;
+    use std::fs;
+    
+    if let Ok(mut path) = app.path().picture_dir() {
+        path.push("Unvaulted");
+        if fs::create_dir_all(&path).is_ok() {
+            return Ok(path);
+        }
+    }
+    
+    if let Ok(mut path) = app.path().home_dir() {
+        path.push("Pictures");
+        path.push("Unvaulted");
+        if fs::create_dir_all(&path).is_ok() {
+            return Ok(path);
+        }
+    }
+    
+    if let Ok(mut path) = app.path().app_data_dir() {
+        path.push("assets");
+        let _ = fs::create_dir_all(&path);
+        return Ok(path);
+    }
+    
+    Err("Failed to resolve any asset store directory".to_string())
+}
+
 #[tauri::command]
 fn resolve_embed(app: tauri::AppHandle, base_dir: String, file_name: String) -> Option<String> {
     use std::path::Path;
@@ -99,6 +127,13 @@ fn resolve_embed(app: tauri::AppHandle, base_dir: String, file_name: String) -> 
     if !base_dir.is_empty() {
         if let Some(found) = search_embed(Path::new(&base_dir), &file_name) {
             return found.to_str().map(|s| s.to_string());
+        }
+    }
+    
+    if let Ok(store) = asset_store_dir(&app) {
+        let asset_path = store.join(&file_name);
+        if asset_path.is_file() {
+            return asset_path.to_str().map(|s| s.to_string());
         }
     }
     
@@ -117,16 +152,12 @@ fn save_pasted_image(app: tauri::AppHandle, file_name: String, contents_base64: 
     use std::fs;
     use std::io::Write;
     use base64::prelude::*;
-    use tauri::Manager;
     
     if file_name.contains('/') || file_name.contains('\\') || file_name.contains("..") {
         return Err("Invalid filename".to_string());
     }
     
-    let app_data = app.path().app_data_dir().map_err(|e| format!("Failed to get app_data_dir: {}", e))?;
-    let assets_dir = app_data.join("assets");
-    
-    fs::create_dir_all(&assets_dir).map_err(|e| format!("Failed to create assets directory: {}", e))?;
+    let assets_dir = asset_store_dir(&app)?;
     
     let target = assets_dir.join(&file_name);
     let bytes = BASE64_STANDARD.decode(&contents_base64).map_err(|e| format!("Failed to decode base64: {}", e))?;
