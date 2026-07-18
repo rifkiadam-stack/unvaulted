@@ -10,6 +10,7 @@ export interface Platform {
   resolveEmbed(baseDir: string, fileName: string): Promise<string | null>;
   savePastedImage(fileName: string, contentsBase64: string): Promise<string>;
   deletePastedImages(names: string[]): Promise<void>;
+  openNewWindow(): Promise<void>;
   showMessage(text: string): Promise<void>;
   showOpenDialog(): Promise<string | null>;
   showSaveDialog(): Promise<string | null>;
@@ -43,6 +44,9 @@ export function tauriPlatform(): Platform {
           console.error(`Failed to delete pasted image ${fileName}:`, e);
         }
       }
+    },
+    async openNewWindow() {
+      await invoke('open_new_window');
     },
     async showMessage(text: string) {
       await message(text);

@@ -20,12 +20,15 @@ Conceptually, Unvaulted is **Notepad**: one file, one window, open-write-save, n
 
 | Action | How |
 |--------|-----|
+| New window | `Ctrl+N`, or **File → New** |
 | Open a file | Double-click a `.md`/`.txt` (pick Unvaulted in *Open with*), or `Ctrl+O`, or drag a file onto the window |
 | Save | `Ctrl+S` — unsaved changes show a `*` in the title bar |
 | Save As | `Ctrl+Shift+S` (`.md`, `.txt`, or anything) |
 | Find in file | `Ctrl+F` |
 | Close window | `Ctrl+W` — you'll be asked first if there are unsaved changes |
 | Switch theme | Click the ☀ / 🌙 icon in the top-right corner (dark is the default) |
+
+The small **File** menu (top-left) holds New / Open / Save / Save As. **Right-click** anywhere in the editor for a context menu: formatting commands in markdown mode, plus Cut / Copy / Paste / Select All / Undo / Redo everywhere.
 
 The big title on the very first line is the **file name** — it can't be edited from inside; rename the file itself (F2 in Explorer) to change it.
 
@@ -41,11 +44,13 @@ Type `#` through `######` followed by a space at the start of a line:
 
 ### Text styles
 
-- `**bold**` → **bold**
-- `*italic*` → *italic*
-- `~~strikethrough~~` → ~~strikethrough~~
-- `==highlight==` → ==highlight==
+- `**bold**` → **bold** — or select text and press `Ctrl+B`
+- `*italic*` → *italic* — or `Ctrl+I`
+- `~~strikethrough~~` → ~~strikethrough~~ — or `Ctrl+Shift+X`
+- `==highlight==` → ==highlight== — or `Ctrl+Shift+H`
 - `` `inline code` `` → `inline code`
+
+All four also live in the right-click menu; press the same shortcut again to un-format.
 
 ### Horizontal rule
 

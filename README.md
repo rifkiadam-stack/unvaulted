@@ -60,11 +60,12 @@ Once per extension, and it sticks.
 - `[[wikilinks]]` and `#tags` render beautifully but are deliberately **inert** — your Obsidian notes still *look* right without pretending there's a vault
 
 **App behavior:**
-- One file = one window; open 3 files = 3 independent windows
+- One file = one window; open 3 files = 3 independent windows (`Ctrl+N` / File → New for a fresh one)
 - Manual save `Ctrl+S` (atomic write) with a `*` dirty marker + confirmation when closing unsaved changes
+- **Right-click context menu**, mode-aware: formatting (`Ctrl+B` bold, `Ctrl+I` italic, `Ctrl+Shift+X` strikethrough, `Ctrl+Shift+H` highlight, insert rule) in markdown mode; Cut/Copy/Paste/Select All/Undo/Redo everywhere
 - Dark & light themes (☀/🌙 toggle, dark by default), modeled on Obsidian's default theme
-- Near-zero chrome: no menu bar, no toolbar, no sidebar
-- `Ctrl+O` open, `Ctrl+F` find, `Ctrl+W` close, drag-drop files onto the window
+- Near-zero chrome: one small **File** menu (New/Open/Save/Save As) — no toolbar, no sidebar
+- `Ctrl+O` open, `Ctrl+Shift+S` save as, `Ctrl+F` find, `Ctrl+W` close, drag-drop files onto the window
 
 📖 **Full guide + live demo**: [`docs/GUIDE.md`](docs/GUIDE.md) — open that file *in Unvaulted* and every example renders live.
 

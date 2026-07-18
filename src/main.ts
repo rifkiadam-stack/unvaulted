@@ -51,6 +51,7 @@ fileBtn.onclick = (e) => {
   e.stopPropagation();
   const rect = fileBtn.getBoundingClientRect();
   showMenu([
+    { label: "New", hint: "Ctrl+N", action: () => platform.openNewWindow() },
     { label: "Open", hint: "Ctrl+O", action: doOpen },
     { label: "Save", hint: "Ctrl+S", action: () => doSave(false) },
     { label: "Save As", hint: "Ctrl+Shift+S", action: () => doSave(true) }
@@ -270,6 +271,10 @@ document.addEventListener('keydown', (e) => {
       case 'o':
         e.preventDefault();
         doOpen();
+        break;
+      case 'n':
+        e.preventDefault();
+        platform.openNewWindow();
         break;
       case 'w':
         e.preventDefault();

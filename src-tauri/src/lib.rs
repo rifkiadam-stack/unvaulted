@@ -229,6 +229,13 @@ fn delete_pasted_image(app: tauri::AppHandle, file_name: String) -> Result<(), S
     Ok(())
 }
 
+#[tauri::command]
+fn open_new_window() -> Result<(), String> {
+    let exe = std::env::current_exe().map_err(|e| e.to_string())?;
+    std::process::Command::new(exe).spawn().map_err(|e| e.to_string())?;
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
   tauri::Builder::default()
@@ -245,7 +252,7 @@ pub fn run() {
       }
       Ok(())
     })
-    .invoke_handler(tauri::generate_handler![get_open_path, save_atomic, read_file, resolve_embed, save_pasted_image, delete_pasted_image])
+    .invoke_handler(tauri::generate_handler![get_open_path, save_atomic, read_file, resolve_embed, save_pasted_image, delete_pasted_image, open_new_window])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }
