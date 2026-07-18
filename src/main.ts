@@ -273,23 +273,25 @@ const updateListener = EditorView.updateListener.of((update) => {
     
     // Frontmatter auto-spawn
     const state = update.state;
-    if (state.doc.lines >= 1 && frontmatterEndOffset(newText) === 0) {
-      const firstLine = state.doc.line(1);
-      if (firstLine.text === "---") {
-        let touchedLine1 = false;
-        update.changes.iterChanges((fromA, toA, fromB, toB) => {
-          if (fromB <= firstLine.to && toB >= firstLine.from) touchedLine1 = true;
-        });
-        
-        if (touchedLine1) {
-          setTimeout(() => {
-            if (view.state.doc.line(1).text === "---" && frontmatterEndOffset(view.state.doc.toString()) === 0) {
-              view.dispatch({
-                changes: { from: view.state.doc.line(1).to, insert: "\n\n---\n" },
-                selection: { anchor: view.state.doc.line(1).to + 1, head: view.state.doc.line(1).to + 1 }
-              });
-            }
-          }, 0);
+    if (markdownActive) {
+      if (state.doc.lines >= 1 && frontmatterEndOffset(newText) === 0) {
+        const firstLine = state.doc.line(1);
+        if (firstLine.text === "---") {
+          let touchedLine1 = false;
+          update.changes.iterChanges((fromA, toA, fromB, toB) => {
+            if (fromB <= firstLine.to && toB >= firstLine.from) touchedLine1 = true;
+          });
+          
+          if (touchedLine1) {
+            setTimeout(() => {
+              if (view.state.doc.line(1).text === "---" && frontmatterEndOffset(view.state.doc.toString()) === 0) {
+                view.dispatch({
+                  changes: { from: view.state.doc.line(1).to, insert: "\n\n---\n" },
+                  selection: { anchor: view.state.doc.line(1).to + 1, head: view.state.doc.line(1).to + 1 }
+                });
+              }
+            }, 0);
+          }
         }
       }
     }
@@ -316,6 +318,7 @@ platform.getCliOpenPath().then(path => {
 });
 
 document.addEventListener('paste', async (e) => {
+  if (!markdownActive) return;
   const items = e.clipboardData?.items;
   if (!items) return;
   
