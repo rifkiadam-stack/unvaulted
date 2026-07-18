@@ -7,6 +7,13 @@ import { frontmatterEndOffset } from "../../session/fileSession";
 
 let pendingFocusKey: string | null = null;
 
+function createEmptySpan() {
+  const span = document.createElement("span");
+  span.className = "uv-prop-empty";
+  span.textContent = "Empty";
+  return span;
+}
+
 class PropertiesWidget extends WidgetType {
   constructor(readonly text: string, readonly from: number) {
     super();
@@ -62,14 +69,14 @@ class PropertiesWidget extends WidgetType {
       if (entry.value.kind === "scalar") {
         currentValueStr = entry.value.value;
         if (currentValueStr === "") {
-          valDisplay.innerHTML = `<span style="color: var(--uv-text-muted); font-style: italic;">Empty</span>`;
+          valDisplay.appendChild(createEmptySpan());
         } else {
           valDisplay.textContent = entry.value.value;
         }
       } else if (entry.value.kind === "list") {
         currentValueStr = entry.value.items.join(", ");
         if (entry.value.items.length === 0) {
-          valDisplay.innerHTML = `<span style="color: var(--uv-text-muted); font-style: italic;">Empty</span>`;
+          valDisplay.appendChild(createEmptySpan());
         } else {
           for (const item of entry.value.items) {
             const chip = document.createElement("span");
@@ -107,6 +114,7 @@ class PropertiesWidget extends WidgetType {
       
       valDisplay.onclick = (e) => {
         e.stopPropagation();
+        pendingFocusKey = null; // C13 clear flag on direct open
         const input = document.createElement("input");
         input.className = "uv-prop-input";
         input.value = currentValueStr;
@@ -127,7 +135,8 @@ class PropertiesWidget extends WidgetType {
           if (entry.value.kind === "scalar") {
             currentValueStr = newVal;
             if (newVal === "") {
-              valDisplay.innerHTML = `<span style="color: var(--uv-text-muted); font-style: italic;">Empty</span>`;
+              valDisplay.innerHTML = "";
+              valDisplay.appendChild(createEmptySpan());
             } else {
               valDisplay.textContent = newVal;
             }
@@ -135,7 +144,7 @@ class PropertiesWidget extends WidgetType {
             currentValueStr = (v as any).items.join(", ");
             valDisplay.innerHTML = "";
             if ((v as any).items.length === 0) {
-              valDisplay.innerHTML = `<span style="color: var(--uv-text-muted); font-style: italic;">Empty</span>`;
+              valDisplay.appendChild(createEmptySpan());
             } else {
               for (const item of (v as any).items) {
                 const chip = document.createElement("span");

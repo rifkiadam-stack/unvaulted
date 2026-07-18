@@ -44,14 +44,7 @@ body {
   padding: 0;
 }
 
-.uv-property-value {
-  flex: 1;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  align-items: center;
-  min-height: 1.4em;
-}
+
 
 .uv-property-value-container {
   display: flex;
@@ -374,6 +367,12 @@ body {
   display: flex;
   flex-wrap: wrap;
   gap: 0.3em;
+  align-items: center;
+  min-height: 1.4em;
+}
+.uv-prop-empty {
+  color: var(--uv-text-muted);
+  font-style: italic;
 }
 .uv-property-chip {
   background-color: color-mix(in srgb, var(--uv-accent) 12%, transparent);
