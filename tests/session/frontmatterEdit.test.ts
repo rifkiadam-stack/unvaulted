@@ -54,6 +54,13 @@ describe("frontmatterEdit module", () => {
     expect(roundTrip(text)).toBe(text);
   });
 
+  it("parses empty known list keys as lists, not scalars", () => {
+    const text = "---\ntags:\n---\n";
+    const parsed = parseFrontmatterBlock(text);
+    expect(parsed).toEqual([{ key: "tags", value: { kind: "list", items: [] } }]);
+    expect(roundTrip(text)).toBe(text);
+  });
+
   it("preserves genuinely complex keys as raw, byte-identically", () => {
     const text = "---\nnested:\n  prop: val\n---\n";
     const parsed = parseFrontmatterBlock(text);

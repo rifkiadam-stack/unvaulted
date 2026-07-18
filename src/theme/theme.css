@@ -385,7 +385,7 @@ body {
   opacity: 0.6;
 }
 .uv-property-raw .uv-property-value {
-  font-family: var(--uv-font-mono);
+  font-family: Consolas, "Cascadia Code", Menlo, monospace;
   white-space: pre-wrap;
   font-size: 0.85em;
   color: var(--uv-text-muted);

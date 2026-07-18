@@ -113,7 +113,12 @@ export function parseFrontmatterBlock(text: string): PropEntry[] | null {
           entries.push({ key, value: { kind: "list", items } });
           i = j;
         } else {
-          entries.push({ key, value: { kind: "scalar", value: "" } });
+          // Empty value without list items
+          if (key === "tags" || key === "sources" || key === "aliases") {
+            entries.push({ key, value: { kind: "list", items: [] } });
+          } else {
+            entries.push({ key, value: { kind: "scalar", value: "" } });
+          }
           i++;
         }
       }
