@@ -265,3 +265,30 @@ actions work, theme toggle still in place, layout unshifted otherwise
   `installer/`.
 - If a future plan adds tabs/multi-file, the File menu is where "New
   Window" would land (deferred by operator choice).
+
+## Review — 2026-07-18
+
+**Verdict: PASS.**
+
+Reviewed `main..feat/014-menus` (4 commits, one per step). Independently
+verified: gates green (typecheck, **120/120 tests** — 114 + 6 new format
+tests, build); `package.json` untouched (no dependencies); every hunk traced
+to a step. All prior-round lessons genuinely applied: Properties-input
+exception before `preventDefault` (native menu preserved), internal scrolls
+don't close menus (C5), menu buttons reset UA chrome (C7), formatting keymap
+lives inside `markdownMode()` with `Prec.high` and zero manual mode checks,
+Paste falls back to `console.warn` per spec. `format.ts` unwrap logic
+handles the hardest edge (italic on bolded text → `***x***`, neighbor-char
+guard) with tests. Real Save As (`doSave(forceDialog)`) bound to
+`Ctrl+Shift+S` and the File menu.
+
+Non-blocking nit recorded: clicking the File button while its menu is open
+closes-then-reopens rather than toggling closed.
+
+Operator smoke 2026-07-18: full matrix (a)–(g) confirmed OK, including
+menu Paste working in WebView2. One follow-up requested by the operator:
+a "New" item (new empty window) — implemented post-merge by the reviewer
+under explicit operator authorization ("tolong anda yang kerjakan aja"),
+as a spawn-new-process command matching the window-per-file model.
+
+**Plan 014 complete — merging to `main`.**
