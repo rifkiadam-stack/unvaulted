@@ -6,6 +6,14 @@ import { Extension } from "@codemirror/state";
 
 import { editorTheme, markdownHighlightStyle } from "./theme/editorTheme";
 
+export function markdownMode(): Extension[] {
+  return [
+    markdownHighlightStyle,
+    unvaultedMarkdown(),
+    livePreview()
+  ];
+}
+
 export function createEditor(parent: HTMLElement, initialText: string, extraExtensions: Extension[] = []): EditorView {
   return new EditorView({
     doc: initialText,
@@ -13,9 +21,6 @@ export function createEditor(parent: HTMLElement, initialText: string, extraExte
       basicSetup,
       EditorView.lineWrapping,
       editorTheme,
-      markdownHighlightStyle,
-      unvaultedMarkdown(),
-      livePreview(),
       ...extraExtensions
     ],
     parent

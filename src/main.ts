@@ -1,5 +1,5 @@
 import "./theme/theme.css";
-import { createEditor } from "./editor";
+import { createEditor, markdownMode } from "./editor";
 import { keymap } from "@codemirror/view";
 import { EditorView } from "@codemirror/view";
 import { tauriPlatform } from "./session/platform";
@@ -106,6 +106,8 @@ async function doOpen() {
 }
 
 const baseCompartment = new Compartment();
+const modeCompartment = new Compartment();
+let markdownActive = true;
 
 async function loadPath(path: string) {
   try {
@@ -284,7 +286,8 @@ const updateListener = EditorView.updateListener.of((update) => {
 
 view = createEditor(editorContainer, '', [
   updateListener,
-  baseCompartment.of(uvBasePath.of(''))
+  baseCompartment.of(uvBasePath.of('')),
+  modeCompartment.of(markdownMode())
 ]);
 
 setEmbedDispatch((effect) => view.dispatch({ effects: [effect] }));
