@@ -121,3 +121,27 @@ export function frontmatterEndOffset(text: string): number {
   
   return 0;
 }
+
+export function pastedImageRefs(text: string): Set<string> {
+  const set = new Set<string>();
+  const regex = /!\[\[(Pasted image \d{8}-\d{6}\.png)\]\]/g;
+  let match;
+  while ((match = regex.exec(text)) !== null) {
+    set.add(match[1]);
+  }
+  return set;
+}
+
+export function droppedPastedImages(before: string, after: string): string[] {
+  const beforeRefs = pastedImageRefs(before);
+  const afterRefs = pastedImageRefs(after);
+  const dropped: string[] = [];
+  
+  for (const ref of beforeRefs) {
+    if (!afterRefs.has(ref)) {
+      dropped.push(ref);
+    }
+  }
+  
+  return dropped.sort();
+}

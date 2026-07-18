@@ -12,7 +12,9 @@ import {
   dirOf,
   pastedImageName,
   imageMarkdownFor,
-  frontmatterEndOffset
+  frontmatterEndOffset,
+  pastedImageRefs,
+  droppedPastedImages
 } from '../../src/session/fileSession';
 
 describe('fileSession pure module', () => {
@@ -128,5 +130,45 @@ describe('fileSession pure module', () => {
       const text = "---\ntitle: test\n---";
       expect(frontmatterEndOffset(text)).toBe(19);
     });
+describe("pastedImageRefs", () => {
+  it("extracts exact pasted image names and ignores malformed ones", () => {
+    const text = `
+    Here is an image ![[Pasted image 20260718-120000.png]]
+    And another ![[Pasted image 20260718-120001.png]]
+    Malformed ![[Pasted image 123.png]]
+    Directory traversal ![[Pasted image ../evil/20260718-120002.png]]
+    `;
+    const refs = pastedImageRefs(text);
+    expect(refs.size).toBe(2);
+    expect(refs.has("Pasted image 20260718-120000.png")).toBe(true);
+    expect(refs.has("Pasted image 20260718-120001.png")).toBe(true);
+  });
+  
+  it("returns empty set for no images", () => {
+    expect(pastedImageRefs("Just some text").size).toBe(0);
   });
 });
+
+describe("droppedPastedImages", () => {
+  it("detects dropped images", () => {
+    const before = "![[Pasted image 20260718-120000.png]]\n![[Pasted image 20260718-120001.png]]";
+    const after = "![[Pasted image 20260718-120000.png]]";
+    const dropped = droppedPastedImages(before, after);
+    expect(dropped).toEqual(["Pasted image 20260718-120001.png"]);
+  });
+  
+  it("returns empty if none dropped", () => {
+    const before = "![[Pasted image 20260718-120000.png]]";
+    const after = "![[Pasted image 20260718-120000.png]]\n![[Pasted image 20260718-120001.png]]";
+    expect(droppedPastedImages(before, after)).toEqual([]);
+  });
+  
+  it("does not drop if one reference remains", () => {
+    const before = "![[Pasted image 20260718-120000.png]]\n![[Pasted image 20260718-120000.png]]";
+    const after = "![[Pasted image 20260718-120000.png]]";
+    expect(droppedPastedImages(before, after)).toEqual([]);
+  });
+});
+});
+});
+
