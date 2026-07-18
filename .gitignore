@@ -1,4 +1,16 @@
 node_modules/
 dist/
 src-tauri/target/
+
+# environment & secrets
 .env
+.env.*
+
+# machine-local Claude Code permissions (never share)
+.claude/settings.local.json
+
+# editor & tool litter
+.vscode/
+*.log
+npm-debug.log*
+vite.config.ts.timestamp-*
