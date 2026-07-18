@@ -256,3 +256,21 @@ frontmatter block; pasting an image does nothing (no file appears in
   gate returns BEFORE `preventDefault`.
 - Docs follow-up (reviewer, post-merge): PANDUAN-UNVAULTED.md needs a short
   note that `.txt` renders literal by design.
+
+## Review — 2026-07-18
+
+**Verdict: PASS.**
+
+Reviewed `main..feat/012-plain-txt` (4 commits, one per step). Independently
+verified: gates green (typecheck, **114/114 JS tests**, build); every hunk
+traced to a step; `src/preview/**` untouched — the mode switch lives
+entirely in the `modeCompartment` seam at main.ts/editor.ts level as
+specified; the paste gate returns before `preventDefault` (plain mode lets
+the event fall through untouched); untitled buffers start in markdown mode
+and Save As flips mode in place only when it actually changes;
+`isMarkdownPath` handles the `a.md.txt` trap. Operator smoke: `.txt` opens
+literal with no issues (2026-07-18).
+
+**Plan 012 complete — merging to `main`.** Follow-ups routed to plan 013
+(combined open-dialog filter + wider non-default Open-with registrations)
+and the docs note in PANDUAN-UNVAULTED.md.
