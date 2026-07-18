@@ -22,9 +22,10 @@ import {
   isMarkdownPath
 } from "./session/fileSession";
 
-import { Extension, Prec, Compartment } from "@codemirror/state";
+import { Compartment, Extension, Prec } from "@codemirror/state";
 import { uvBasePath } from "./preview/widgets/image";
 import { setEmbedDispatch } from "./preview/embedResolver";
+import { installContextMenu } from "./ui/menus";
 import { initialMode, nextMode, ThemeMode } from "./theme/themeMode";
 
 let session = emptySession();
@@ -310,6 +311,8 @@ view = createEditor(editorContainer, '', [
   baseCompartment.of(uvBasePath.of('')),
   modeCompartment.of(markdownMode())
 ]);
+
+installContextMenu(view, { isMarkdown: () => markdownActive });
 
 setEmbedDispatch((effect) => view.dispatch({ effects: [effect] }));
 

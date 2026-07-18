@@ -471,3 +471,46 @@ body {
 .uv-modal button:hover {
   background-color: var(--uv-selection);
 }
+
+/* Context Menu & File Menu */
+.uv-menu {
+  position: fixed;
+  background-color: var(--uv-bg);
+  color: var(--uv-text);
+  border: 1px solid var(--uv-border);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  padding: 4px;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  min-width: 150px;
+  overflow-y: auto;
+  font-family: system-ui, sans-serif;
+  font-size: 13px;
+}
+.uv-menu-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 12px;
+  background: none;
+  border: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 4px;
+  gap: 16px;
+}
+.uv-menu-item:hover {
+  background-color: var(--uv-selection);
+}
+.uv-menu-sep {
+  height: 1px;
+  background-color: var(--uv-border);
+  margin: 4px 0;
+}
+.uv-menu-hint {
+  color: var(--uv-text-muted);
+  font-size: 11px;
+}
