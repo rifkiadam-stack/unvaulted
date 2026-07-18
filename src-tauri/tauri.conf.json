@@ -54,6 +54,12 @@
         "name": "Text",
         "description": "Text document",
         "role": "Editor"
+      },
+      {
+        "ext": ["json", "csv", "log", "xml", "yml", "yaml", "ini"],
+        "name": "Plain text formats",
+        "description": "Plain text document",
+        "role": "Editor"
       }
     ],
     "windows": {
