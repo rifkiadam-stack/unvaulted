@@ -482,3 +482,40 @@ render translucent purple on BOTH dark and light themes (no white);
 open the operator-style file with frontmatter → same; click accuracy in
 text right below the Properties card is unchanged (the removed
 margin-bottom must not shift hit-testing).
+
+## Review — 2026-07-18
+
+**Verdict: PASS.**
+
+Reviewed `main..feat/010-properties` across Steps 1–5 and five correction
+rounds (C1–C15). Independently verified at each round: gates green (final:
+typecheck, **108/108 JS tests**, build, `cargo check`); scope clean (no new
+dependencies; the executor's transient Puppeteer experiment left zero
+traces); every hunk traced to a plan step or correction.
+
+Highlights of the correction history (for future archaeology):
+
+- **Product revision mid-plan**: the 7-key limit became suggestions +
+  free-text keys (Obsidian's real model); unknown simple-shaped keys
+  render/edit like known ones, with YAML quoting preserved round-trip
+  (`- "[[cs50]]"` survives quoted).
+- **C9 was the load-bearing bug**: commits that serialize to identical
+  text dispatched a no-op, never rebuilt, and stranded raw `<input>`s in
+  the card — the operator's recurring "white box with ×". Commit now
+  restores the DOM row itself and dispatches only on real change.
+- **C13**: `pendingFocusKey` set on every mousedown but cleared only in
+  the rebuild path → inputs reopened after Enter; cleared on direct open.
+- **C15 closed the saga**: the persistent white chips were never
+  theme.css's fault — `src/preview/preview.css` (plan-003 placeholder
+  skin) still defined `.uv-property-chip` with fallback `#eee` and won
+  the cascade by import order; it also re-introduced a margin on a block
+  widget root (the known click-drift hazard). Placeholder blocks deleted;
+  theme.css is the single skin.
+
+Operator smoke: all rounds' checklists confirmed, final pass 2026-07-18
+(chips purple in both themes, old files clean, no ghost inputs, Enter
+closes, tags serialize as list lines, click accuracy intact).
+
+**Plan 010 complete — merging to `main`.** Plan 011 (orphan cleanup +
+Pictures\Unvaulted store relocation) executes next; final installer build
+after that.
