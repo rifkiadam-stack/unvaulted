@@ -446,3 +446,39 @@ value; then edit another row → no ghost input opens elsewhere.
   single rule (keep `min-height: 1.4em`; the `gap` stays `0.3em`).
 
 **Verify**: gates green; the two manual checks under C13.
+
+## Corrections — round 5 (operator smoke of round 4, 2026-07-18)
+
+C13 confirmed by operator (inputs open/close correctly now). But the WHITE
+pills on `tags`/`sources` chips persist — and the reviewer found the true
+root cause, which explains why three rounds of theme.css fixes never
+helped:
+
+**`src/preview/preview.css` is a stale placeholder skin from plan 003**
+(pre-dating the plan-005 Obsidian theme) and it contains a SECOND
+definition of the Properties card classes. Its
+`.uv-property-chip { background-color: var(--uv-chip-bg, #eee); }` uses a
+token that has never existed, so the `#eee` (white) fallback applies — and
+because `preview.css` is imported later (via livePreview.ts) it WINS over
+theme.css at equal specificity. The chips have been `#eee` all along.
+Worse, its `.uv-properties { margin-bottom: 1em; }` puts a margin on a
+block-widget root — the exact click-drift hazard this project already
+eliminated once (margins are invisible to CM height measurement).
+
+### C15 — Remove the stale Properties skin from preview.css (one commit)
+
+- Delete ONLY these blocks from `src/preview/preview.css`:
+  `.uv-properties`, `.uv-properties-header`, `.uv-property-row`,
+  `.uv-property-key`, `.uv-property-value`, `.uv-property-chip`
+  (lines 1–34). theme.css becomes the single source of truth for the card.
+- Do NOT touch the `.uv-h1`–`.uv-h6` rules or the `text-decoration`
+  guard at the bottom — they are unrelated to this bug.
+- Expected visual side effect (intended): the key column becomes the
+  theme.css `width: 120px` instead of `flex: 0 0 30%` — closer to
+  Obsidian; mention it in the report.
+
+**Verify**: gates green. Dev smoke: chips on `tags`/`sources`/`related`
+render translucent purple on BOTH dark and light themes (no white);
+open the operator-style file with frontmatter → same; click accuracy in
+text right below the Properties card is unchanged (the removed
+margin-bottom must not shift hit-testing).
