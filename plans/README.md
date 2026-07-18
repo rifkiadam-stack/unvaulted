@@ -27,6 +27,7 @@ live preview, manual save, near-zero chrome.
 | 011 | Orphan cleanup + relocate store to Pictures\Unvaulted | P3 | S | 010 | DONE (PASS — reviewer-confirmed 2026-07-18; operator smoke all green; v0.1.0 SHIPPED) |
 | 012 | Plain-text mode: `.txt` renders literal, markdown only for `.md`/`.markdown` | P2 | S/M | 011 | DONE (PASS — reviewer-confirmed 2026-07-18; operator smoke green) |
 | 013 | Combined open-dialog filter + wider non-default "Open with" (json/csv/log/xml/yml/yaml/ini) | P3 | S | 012 | DONE (PASS — reviewer-confirmed 2026-07-18; association smoke at release install) |
+| 014 | Context menu (mode-aware) + formatting shortcuts + File menu + real Save As | P2 | M | 013 | TODO (plan written 2026-07-18) |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (one-line reason) | REJECTED
 (one-line rationale).
