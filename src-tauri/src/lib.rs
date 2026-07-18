@@ -2,7 +2,8 @@
 fn get_open_path() -> Option<String> {
     if let Some(arg) = std::env::args().nth(1) {
         let arg_lower = arg.to_lowercase();
-        if (arg_lower.ends_with(".md") || arg_lower.ends_with(".markdown") || arg_lower.ends_with(".txt")) && std::path::Path::new(&arg).exists() {
+        let allowed_exts = [".md", ".markdown", ".txt", ".json", ".csv", ".log", ".xml", ".yml", ".yaml", ".ini"];
+        if allowed_exts.iter().any(|ext| arg_lower.ends_with(ext)) && std::path::Path::new(&arg).exists() {
             return Some(arg);
         }
     }
