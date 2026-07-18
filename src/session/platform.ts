@@ -9,6 +9,7 @@ export interface Platform {
   saveAtomic(path: string, contents: string): Promise<void>;
   resolveEmbed(baseDir: string, fileName: string): Promise<string | null>;
   savePastedImage(fileName: string, contentsBase64: string): Promise<string>;
+  deletePastedImages(names: string[]): Promise<void>;
   showMessage(text: string): Promise<void>;
   showOpenDialog(): Promise<string | null>;
   showSaveDialog(): Promise<string | null>;
@@ -33,6 +34,15 @@ export function tauriPlatform(): Platform {
     },
     async savePastedImage(fileName: string, contentsBase64: string) {
       return invoke<string>('save_pasted_image', { fileName, contentsBase64 });
+    },
+    async deletePastedImages(names: string[]) {
+      for (const fileName of names) {
+        try {
+          await invoke('delete_pasted_image', { fileName });
+        } catch (e) {
+          console.error(`Failed to delete pasted image ${fileName}:`, e);
+        }
+      }
     },
     async showMessage(text: string) {
       await message(text);

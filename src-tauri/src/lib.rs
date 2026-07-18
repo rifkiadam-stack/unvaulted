@@ -178,6 +178,56 @@ fn save_pasted_image(app: tauri::AppHandle, file_name: String, contents_base64: 
     target.to_str().map(|s| s.to_string()).ok_or_else(|| "Invalid target path".to_string())
 }
 
+fn is_pasted_image_name(name: &str) -> bool {
+    if name.len() != 32 {
+        return false;
+    }
+    if !name.starts_with("Pasted image ") || !name.ends_with(".png") {
+        return false;
+    }
+    
+    let chars: Vec<char> = name.chars().collect();
+    for i in 13..21 {
+        if !chars[i].is_ascii_digit() { return false; }
+    }
+    if chars[21] != '-' { return false; }
+    for i in 22..28 {
+        if !chars[i].is_ascii_digit() { return false; }
+    }
+    true
+}
+
+#[tauri::command]
+fn delete_pasted_image(app: tauri::AppHandle, file_name: String) -> Result<(), String> {
+    use std::fs;
+    use tauri::Manager;
+    
+    if file_name.contains('/') || file_name.contains('\\') || file_name.contains("..") {
+        return Err("Invalid filename".to_string());
+    }
+    
+    if !is_pasted_image_name(&file_name) {
+        return Err("Invalid format".to_string());
+    }
+    
+    if let Ok(store) = asset_store_dir(&app) {
+        let target = store.join(&file_name);
+        if target.exists() {
+            let _ = fs::remove_file(target);
+            return Ok(());
+        }
+    }
+    
+    if let Ok(app_data) = app.path().app_data_dir() {
+        let legacy = app_data.join("assets").join(&file_name);
+        if legacy.exists() {
+            let _ = fs::remove_file(legacy);
+        }
+    }
+    
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
   tauri::Builder::default()
@@ -194,7 +244,7 @@ pub fn run() {
       }
       Ok(())
     })
-    .invoke_handler(tauri::generate_handler![get_open_path, save_atomic, read_file, resolve_embed, save_pasted_image])
+    .invoke_handler(tauri::generate_handler![get_open_path, save_atomic, read_file, resolve_embed, save_pasted_image, delete_pasted_image])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }
@@ -232,11 +282,20 @@ mod tests {
     #[test]
     fn test_search_embed_not_found() {
         let temp_dir = std::env::temp_dir().join(format!("unvaulted_test_nf_{}", std::process::id()));
-        fs::create_dir_all(&temp_dir).unwrap();
+        std::fs::create_dir_all(&temp_dir).unwrap();
         
         let resolved = search_embed(&temp_dir, "nowhere.png");
         assert_eq!(resolved, None);
         
-        let _ = fs::remove_dir_all(&temp_dir);
+        let _ = std::fs::remove_dir_all(&temp_dir);
+    }
+
+    #[test]
+    fn test_is_pasted_image_name() {
+        assert!(is_pasted_image_name("Pasted image 20260718-120000.png"));
+        assert!(!is_pasted_image_name("Pasted image 123.png"));
+        assert!(!is_pasted_image_name("Pasted image 20260718-120000.jpg"));
+        assert!(!is_pasted_image_name("../Pasted image 20260718-120000.png"));
+        assert!(!is_pasted_image_name("Pasted image 202607A8-120000.png"));
     }
 }
