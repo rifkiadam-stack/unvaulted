@@ -18,7 +18,8 @@ import {
   pastedImageName,
   imageMarkdownFor,
   frontmatterEndOffset,
-  droppedPastedImages
+  droppedPastedImages,
+  isMarkdownPath
 } from "./session/fileSession";
 
 import { Compartment } from "@codemirror/state";
@@ -109,16 +110,23 @@ const baseCompartment = new Compartment();
 const modeCompartment = new Compartment();
 let markdownActive = true;
 
+function modeEffectsFor(path: string | null) {
+  const md = isMarkdownPath(path);
+  markdownActive = md;
+  return modeCompartment.reconfigure(md ? markdownMode() : []);
+}
+
 async function loadPath(path: string) {
   try {
     const text = await platform.readFile(path);
     const newState = loadFile(path, text);
-    const endOffset = frontmatterEndOffset(newState.currentText);
+    const md = isMarkdownPath(path);
+    const endOffset = md ? frontmatterEndOffset(newState.currentText) : 0;
     
     view.dispatch({
       changes: { from: 0, to: view.state.doc.length, insert: newState.currentText },
       selection: { anchor: endOffset, head: endOffset },
-      effects: baseCompartment.reconfigure(uvBasePath.of(dirOf(path)))
+      effects: [baseCompartment.reconfigure(uvBasePath.of(dirOf(path))), modeEffectsFor(path)]
     });
     
     await updateState(newState);
@@ -146,6 +154,10 @@ async function doSave(): Promise<boolean> {
     const newState = afterSave(session);
     newState.path = targetPath; // in case it was untitled
     await updateState(newState);
+    
+    if (isMarkdownPath(targetPath) !== markdownActive) {
+      view.dispatch({ effects: modeEffectsFor(targetPath) });
+    }
     
     if (dropped.length > 0) {
       await new Promise<void>((resolve) => {
