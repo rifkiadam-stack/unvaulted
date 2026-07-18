@@ -1,37 +1,4 @@
-.uv-properties {
-  border: 1px solid var(--uv-border, #ccc);
-  padding: 8px 12px;
-  border-radius: 4px;
-  margin-bottom: 1em;
-}
 
-.uv-properties-header {
-  font-weight: bold;
-  margin-bottom: 8px;
-}
-
-.uv-property-row {
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  margin-bottom: 4px;
-}
-
-.uv-property-key {
-  flex: 0 0 30%;
-}
-
-.uv-property-value {
-  flex: 1 1 auto;
-}
-
-.uv-property-chip {
-  display: inline-block;
-  padding: 2px 8px;
-  margin-right: 4px;
-  background-color: var(--uv-chip-bg, #eee);
-  border-radius: 12px;
-}
 
 .uv-h1 { font-size: 1.6em; font-weight: bold; }
 .uv-h2 { font-size: 1.4em; font-weight: bold; }
