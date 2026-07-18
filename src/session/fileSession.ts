@@ -145,3 +145,9 @@ export function droppedPastedImages(before: string, after: string): string[] {
   
   return dropped.sort();
 }
+
+export function isMarkdownPath(path: string | null): boolean {
+  if (path === null) return true;
+  const lower = path.toLowerCase();
+  return lower.endsWith('.md') || lower.endsWith('.markdown');
+}

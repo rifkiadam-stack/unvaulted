@@ -14,7 +14,8 @@ import {
   imageMarkdownFor,
   frontmatterEndOffset,
   pastedImageRefs,
-  droppedPastedImages
+  droppedPastedImages,
+  isMarkdownPath
 } from '../../src/session/fileSession';
 
 describe('fileSession pure module', () => {
@@ -170,5 +171,15 @@ describe("droppedPastedImages", () => {
   });
 });
 });
-});
 
+describe("isMarkdownPath", () => {
+  it("determines markdown paths correctly", () => {
+    expect(isMarkdownPath(null)).toBe(true);
+    expect(isMarkdownPath("C:\\notes\\a.md")).toBe(true);
+    expect(isMarkdownPath("a.MARKDOWN")).toBe(true);
+    expect(isMarkdownPath("a.txt")).toBe(false);
+    expect(isMarkdownPath("a")).toBe(false);
+    expect(isMarkdownPath("a.md.txt")).toBe(false);
+  });
+});
+});
